@@ -33,10 +33,10 @@ jobs:
         continue-on-error: true
 
   # ─────────────────────────────────────────────
-  # 2. Build & Push Docker image
+  # 2. Build & Archive Image
   # ─────────────────────────────────────────────
   build:
-    name: Build & Push Image
+    name: Build & Archive Image
     runs-on: ubuntu-latest
     needs: validate
     outputs:
@@ -53,13 +53,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Extract image metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -69,16 +62,30 @@ jobs:
             type=sha,prefix=sha-
             type=raw,value=latest,enable={{is_default_branch}}
 
-      - name: Build and push
+      - name: Build and Archive Docker Image Locally
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          push: false
+          tags: ghcr.io/${{ github.repository_owner }}/atashtravel:latest
+          outputs: type=docker,dest=/tmp/atashtravel.tar
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Setup SSH for Transfer
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add server to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p 3031 -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Upload Image to Server via SCP
+        run: |
+          scp -P 3031 /tmp/atashtravel.tar ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/tmp/atashtravel.tar
 
   # ─────────────────────────────────────────────
   # 3. Deploy to server
@@ -100,7 +107,6 @@ jobs:
       - name: Add server to known hosts
         run: |
           mkdir -p ~/.ssh
-          # Added -p 3031 to fetch the host key correctly
           ssh-keyscan -p 3031 -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy
@@ -109,22 +115,19 @@ jobs:
           SERVER_USER: ${{ secrets.SERVER_USER }}
           SERVER_PATH: ${{ secrets.ATASHTRAVEL_PATH }}
         run: |
-          # Added -p 3031 to target your custom SSH port
           ssh -p 3031 $SERVER_USER@$SERVER_HOST bash -s << 'ENDSSH'
             set -e
 
-            echo "→ Pulling latest code..."
+            echo "→ Pulling latest configurations using explicit identity..."
             cd ${{ secrets.ATASHTRAVEL_PATH }}
-            git pull origin main
+            GIT_SSH_COMMAND="ssh -i ~/.ssh/githubsajad -o StrictHostKeyChecking=accept-new" git pull origin main
 
-            echo "→ Logging into GitHub Container Registry..."
-            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+            echo "→ Loading fresh Docker image locally..."
+            docker load -i /tmp/atashtravel.tar
+            rm -f /tmp/atashtravel.tar
 
             echo "→ Ensuring talaseen-network exists..."
             docker network inspect talaseen-network >/dev/null 2>&1 || docker network create talaseen-network
-
-            echo "→ Pulling latest image..."
-            docker compose pull
 
             echo "→ Starting / updating container..."
             docker compose up -d --remove-orphans
@@ -146,19 +149,12 @@ jobs:
 
               echo "✓ SSL certificate issued"
             fi
-
-            echo "→ Reloading Talaseen nginx..."
-            docker exec talaseen-nginx nginx -s reload
-
-            echo "→ Removing unused images..."
-            docker image prune -f
-
+            
             echo "✓ Atash Travel deployed successfully"
           ENDSSH
 
       - name: Verify deployment
         run: |
           sleep 10
-          # Added -p 3031 here to fix the health/container verification check
           ssh -p 3031 ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
             "docker ps --filter name=atashtravel --format '{{.Status}}'"
