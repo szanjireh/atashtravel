@@ -1,10 +1,12 @@
+version: "3.9"
+
 services:
   atashtravel:
     image: ghcr.io/szanjireh/atashtravel:latest
     container_name: atashtravel
+    restart: unless-stopped
     expose:
       - "80"
-    restart: unless-stopped
     networks:
       - talaseen-network
     healthcheck:
@@ -16,4 +18,4 @@ services:
 
 networks:
   talaseen-network:
-    external: true
+    external: true  # Instructs this repo to connect to the network created by Talaseen
