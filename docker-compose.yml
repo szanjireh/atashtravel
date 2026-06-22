@@ -10,7 +10,8 @@ services:
     networks:
       - talaseen-network
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      disable: true
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:80/health"]
       interval: 30s
       timeout: 5s
       retries: 3
