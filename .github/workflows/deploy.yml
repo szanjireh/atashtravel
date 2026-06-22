@@ -87,7 +87,6 @@ jobs:
     name: Deploy to Production
     runs-on: ubuntu-latest
     needs: build
-    # 🌟 REMOVED "environment: production" TO ACCESS GLOBAL REPOSITORY SECRETS DIRECTLY
 
     steps:
       - name: Checkout
@@ -101,7 +100,8 @@ jobs:
       - name: Add server to known hosts
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+          # Added -p 3031 to fetch the host key correctly
+          ssh-keyscan -p 3031 -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy
         env:
@@ -109,7 +109,8 @@ jobs:
           SERVER_USER: ${{ secrets.SERVER_USER }}
           SERVER_PATH: ${{ secrets.ATASHTRAVEL_PATH }}
         run: |
-          ssh $SERVER_USER@$SERVER_HOST bash -s << 'ENDSSH'
+          # Added -p 3031 to target your custom SSH port
+          ssh -p 3031 $SERVER_USER@$SERVER_HOST bash -s << 'ENDSSH'
             set -e
 
             echo "→ Pulling latest code..."
@@ -155,5 +156,6 @@ jobs:
       - name: Verify deployment
         run: |
           sleep 10
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
+          # Added -p 3031 here to fix the health/container verification check
+          ssh -p 3031 ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
             "docker ps --filter name=atashtravel --format '{{.Status}}'"
