@@ -120,6 +120,9 @@ jobs:
             echo "→ Logging into GitHub Container Registry..."
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
+            echo "→ Ensuring talaseen-network exists..."
+            docker network inspect talaseen-network >/dev/null 2>&1 || docker network create talaseen-network
+
             echo "→ Pulling latest image..."
             docker compose pull
 

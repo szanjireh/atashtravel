@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   atashtravel:
     image: ghcr.io/szanjireh/atashtravel:latest
