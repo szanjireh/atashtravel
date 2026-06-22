@@ -2,16 +2,13 @@ version: "3.9"
 
 services:
   atashtravel:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: atashtravel/frontend:latest
+    image: ghcr.io/YOUR_GITHUB_USERNAME/atashtravel:latest
     container_name: atashtravel
     expose:
       - "80"
     restart: unless-stopped
     networks:
-      - talaseen-network   # Shared network so Talaseen's nginx can proxy here
+      - talaseen-network
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost/health"]
       interval: 30s
@@ -20,7 +17,5 @@ services:
       start_period: 10s
 
 networks:
-  # Connects to the existing Talaseen Docker network so the shared
-  # reverse-proxy (Talaseen's nginx) can route atashtravel.com traffic here.
   talaseen-network:
     external: true
