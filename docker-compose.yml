@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   atashtravel:
-    image: ghcr.io/YOUR_GITHUB_USERNAME/atashtravel:latest
+    image: ghcr.io/szanjireh/atashtravel:latest
     container_name: atashtravel
     expose:
       - "80"
