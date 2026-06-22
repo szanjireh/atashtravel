@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  atashtravel-frontend:
+    image: atashtravel/frontend:latest # Replace with your actual image name
+    container_name: atashtravel-frontend
+    expose:
+      - "3000" # Internal port, no need to map to host ports like 80:3000
+    restart: always
+    networks:
+      - talaseen_default # We connect it to the same network so Nginx can see it
+
+networks:
+  talaseen_default:
+    external: true # Tells Docker to use your existing Talaseen networkw
