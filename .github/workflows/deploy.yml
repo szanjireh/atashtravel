@@ -41,6 +41,11 @@ jobs:
     needs: validate
     outputs:
       image_tag: ${{ steps.meta.outputs.version }}
+    
+    # 🌟 ADDED PERMISSIONS HERE TO ALLOW GHCR PUSHES 🌟
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout
@@ -103,7 +108,6 @@ jobs:
         env:
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
           SERVER_USER: ${{ secrets.SERVER_USER }}
-
           SERVER_PATH: ${{ secrets.ATASHTRAVEL_PATH }}
         run: |
           ssh $SERVER_USER@$SERVER_HOST bash -s << 'ENDSSH'
