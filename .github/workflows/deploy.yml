@@ -33,59 +33,21 @@ jobs:
         continue-on-error: true
 
   # ─────────────────────────────────────────────
-  # 2. Build & Archive Image
+  # 2. Prepare Deploy
   # ─────────────────────────────────────────────
   build:
-    name: Build & Archive Image
+    name: Prepare Deploy
     runs-on: ubuntu-latest
     needs: validate
-    outputs:
-      image_tag: ${{ steps.meta.outputs.version }}
-    
     permissions:
       contents: read
-      packages: write
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Extract image metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/${{ github.repository_owner }}/atashtravel
-          tags: |
-            type=sha,prefix=sha-
-            type=raw,value=latest,enable={{is_default_branch}}
-
-      - name: Build and Archive Docker Image Locally
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile
-          push: false
-          tags: ghcr.io/${{ github.repository_owner }}/atashtravel:latest
-          outputs: type=docker,dest=/tmp/atashtravel.tar
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Setup SSH for Transfer
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Add server to known hosts
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -p 3031 -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
-
-      - name: Upload Image to Server via SCP
-        run: |
-          scp -P 3031 /tmp/atashtravel.tar ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/tmp/atashtravel.tar
+      - name: Validate Docker Compose
+        run: docker compose config
 
   # ─────────────────────────────────────────────
   # 3. Deploy to server
@@ -122,9 +84,8 @@ jobs:
             cd ${{ secrets.ATASHTRAVEL_PATH }}
             GIT_SSH_COMMAND="ssh -i ~/.ssh/githubsajad -o StrictHostKeyChecking=accept-new" git pull origin main
 
-            echo "→ Loading fresh Docker image locally..."
-            docker load -i /tmp/atashtravel.tar
-            rm -f /tmp/atashtravel.tar
+            echo "→ Rebuilding Docker Compose services on the host..."
+            docker compose build
 
             echo "→ Ensuring talaseen-network exists..."
             docker network inspect talaseen-network >/dev/null 2>&1 || docker network create talaseen-network
