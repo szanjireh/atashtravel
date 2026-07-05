@@ -87,11 +87,14 @@ jobs:
             echo "→ Rebuilding Docker Compose services on the host..."
             docker compose build
 
+            echo "→ Tearing down any existing stack to free ports..."
+            docker compose down --remove-orphans || true
+
             echo "→ Ensuring talaseen-network exists..."
             docker network inspect talaseen-network >/dev/null 2>&1 || docker network create talaseen-network
 
             echo "→ Starting / updating container..."
-            docker compose up -d --remove-orphans
+            docker compose up -d --remove-orphans --force-recreate
 
             # ── SSL provisioning (first-time only) ──────────────────────────
             if [[ "${{ github.event.inputs.provision_ssl }}" == "true" ]]; then
