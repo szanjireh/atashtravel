@@ -1,7 +1,7 @@
 # ==================================
 # Stage 1: Dependencies
 # ==================================
-FROM node:20-alpine AS dependencies
+FROM node:20-slim AS dependencies
 
 WORKDIR /app
 
@@ -12,15 +12,18 @@ COPY package*.json ./
 COPY apps/api/package*.json ./apps/api/
 
 # Install only production dependencies for API workspace
-RUN apk add --no-cache python3 build-base && \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends python3 build-essential && \
+    rm -rf /var/lib/apt/lists/* && \
     npm ci --workspace=api --omit=dev && \
     npm cache clean --force && \
-    apk del python3 build-base
+    apt-get purge -y --auto-remove python3 build-essential && \
+    rm -rf /var/lib/apt/lists/*
 
 # ==================================
 # Stage 2: Build
 # ==================================
-FROM node:20-alpine AS build
+FROM node:20-slim AS build
 
 WORKDIR /app
 
@@ -31,7 +34,9 @@ COPY package*.json ./
 COPY apps/api/package*.json ./apps/api/
 
 # Install all dependencies (including dev) for API
-RUN apk add --no-cache python3 build-base && \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends python3 build-essential && \
+    rm -rf /var/lib/apt/lists/* && \
     npm ci --workspace=api
 
 # Copy Prisma schema
@@ -49,16 +54,18 @@ RUN npm run build --workspace=api
 # ==================================
 # Stage 3: Production
 # ==================================
-FROM node:20-alpine AS production
+FROM node:20-slim AS production
 
 WORKDIR /app
 
 # Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends dumb-init && \
+    rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nestjs -u 1001
+RUN groupadd -g 1001 nodejs && \
+    useradd -m -u 1001 -g nodejs nestjs
 
 # Copy root package files
 COPY --from=dependencies --chown=nestjs:nodejs /app/package*.json ./
