@@ -85,7 +85,7 @@ jobs:
             GIT_SSH_COMMAND="ssh -i ~/.ssh/githubsajad -o StrictHostKeyChecking=accept-new" git pull origin main
 
             echo "→ Rebuilding Docker Compose services on the host..."
-            docker compose build
+            docker compose build --no-cache
 
             echo "→ Tearing down any existing stack to free ports..."
             docker compose down --remove-orphans || true
@@ -94,7 +94,7 @@ jobs:
             docker network inspect talaseen-network >/dev/null 2>&1 || docker network create talaseen-network
 
             echo "→ Starting / updating container..."
-            docker compose up -d --remove-orphans --force-recreate
+            docker compose up -d --remove-orphans
 
             # ── SSL provisioning (first-time only) ──────────────────────────
             if [[ "${{ github.event.inputs.provision_ssl }}" == "true" ]]; then
