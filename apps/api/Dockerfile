@@ -12,8 +12,10 @@ COPY package*.json ./
 COPY apps/api/package*.json ./apps/api/
 
 # Install only production dependencies for API workspace
-RUN npm ci --workspace=api --omit=dev && \
-    npm cache clean --force
+RUN apk add --no-cache python3 build-base && \
+    npm ci --workspace=api --omit=dev && \
+    npm cache clean --force && \
+    apk del python3 build-base
 
 # ==================================
 # Stage 2: Build
@@ -29,7 +31,8 @@ COPY package*.json ./
 COPY apps/api/package*.json ./apps/api/
 
 # Install all dependencies (including dev) for API
-RUN npm ci --workspace=api
+RUN apk add --no-cache python3 build-base && \
+    npm ci --workspace=api
 
 # Copy Prisma schema
 COPY apps/api/prisma ./apps/api/prisma/
