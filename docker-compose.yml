@@ -95,10 +95,6 @@ services:
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
     ports:
       - "${PORT:-4000}:4000"
-    volumes:
-      - ./apps/api:/app
-      - /app/node_modules
-      - /app/dist
     networks:
       - atashtravel-network
     depends_on:
@@ -129,10 +125,6 @@ services:
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
     ports:
       - "3000:3000"
-    volumes:
-      - ./apps/web:/app
-      - /app/node_modules
-      - /app/.next
     networks:
       - atashtravel-network
     depends_on:
