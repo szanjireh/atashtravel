@@ -120,5 +120,14 @@ jobs:
       - name: Verify deployment
         run: |
           sleep 10
-          ssh -p 3031 ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
-            "docker ps --filter name=atashtravel --format '{{.Status}}'"
+          ssh -p 3031 ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+            set -e
+            echo '=== Docker containers ==='
+            docker ps --filter name=atashtravel --format '{{.Names}}: {{.Status}}'
+            echo '=== Compose status ==='
+            docker compose ps
+            echo '=== Local HTTP health check ==='
+            curl -I http://localhost/health
+            echo '=== Local front-end check ==='
+            curl -I http://localhost/
+          EOF
