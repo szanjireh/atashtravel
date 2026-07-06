@@ -118,16 +118,17 @@ jobs:
           ENDSSH
 
       - name: Verify deployment
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
         run: |
           sleep 10
-          ssh -p 3031 ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+          ssh -p 3031 $SERVER_USER@$SERVER_HOST << 'EOF'
             set -e
             echo '=== Docker containers ==='
             docker ps --filter name=atashtravel --format '{{.Names}}: {{.Status}}'
-            echo '=== Compose status ==='
-            docker compose ps
             echo '=== Local HTTP health check ==='
-            curl -I http://localhost/health
+            curl -sf http://localhost/health && echo 'health: OK'
             echo '=== Local front-end check ==='
-            curl -I http://localhost/
+            curl -sf -o /dev/null -w '%{http_code}' http://localhost/ && echo ''
           EOF
