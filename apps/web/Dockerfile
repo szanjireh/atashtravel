@@ -7,7 +7,7 @@ WORKDIR /app
 
 # Copy npm config for timeout settings
 COPY .npmrc ./
-COPY apps/web/.npmrc ./apps/web/ 2>/dev/null || :
+COPY apps/web/.npmrc ./apps/web/
 
 # Copy root package files for workspace
 COPY package*.json ./
@@ -33,7 +33,7 @@ WORKDIR /app
 
 # Copy npm config for timeout settings
 COPY .npmrc ./
-COPY apps/web/.npmrc ./apps/web/ 2>/dev/null || :
+COPY apps/web/.npmrc ./apps/web/
 
 # Copy root package files
 COPY package*.json ./
