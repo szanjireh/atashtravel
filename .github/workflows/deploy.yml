@@ -84,15 +84,8 @@ jobs:
             cd ${{ secrets.ATASHTRAVEL_PATH }}
             GIT_SSH_COMMAND="ssh -i ~/.ssh/githubsajad -o StrictHostKeyChecking=accept-new" git pull origin main
 
-            echo "→ Enabling Docker BuildKit for better caching..."
-            export DOCKER_BUILDKIT=1
-            export COMPOSE_DOCKER_CLI_BUILD=1
-
-            echo "→ Authenticating with Docker Hub..."
-            echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USER }}" --password-stdin
-
-            echo "→ Rebuilding Docker Compose services with BuildKit..."
-            docker compose build --progress=plain
+            echo "→ Rebuilding Docker Compose services..."
+            docker compose build
 
             echo "→ Tearing down any existing stack to free ports..."
             docker compose down --remove-orphans || true
