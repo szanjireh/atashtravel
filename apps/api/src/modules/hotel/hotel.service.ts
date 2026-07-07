@@ -9,7 +9,7 @@ export class HotelService {
     const { search, cityId, minPrice, maxPrice, rating, page = 1, limit = 20 } = query;
     const skip = (page - 1) * limit;
 
-    const where: any = { isActive: true, deletedAt: null };
+    const where: any = { status: 'active', deletedAt: null };
 
     if (search) {
       where.OR = [
@@ -27,7 +27,6 @@ export class HotelService {
         include: {
           city: { include: { country: true } },
           images: { take: 1, orderBy: { sortOrder: 'asc' } },
-          rooms: { where: { isActive: true }, take: 1 },
         },
         skip,
         take: Number(limit),
@@ -48,18 +47,18 @@ export class HotelService {
       include: {
         city: { include: { country: true } },
         images: { orderBy: { sortOrder: 'asc' } },
-        rooms: {
-          where: { isActive: true },
-          include: { prices: { where: { date: { gte: new Date() } }, take: 30 } },
+        roomTypes: {
+          include: {
+            rooms: true,
+            prices: { where: { date: { gte: new Date() } }, take: 30 },
+          },
         },
         facilities: { include: { facility: true } },
-        reviews: { take: 10, include: { user: { select: { firstName: true, lastName: true, avatar: true } } } },
+        reviews: { take: 10, include: { booking: true } },
       },
     });
 
     if (!hotel) throw new NotFoundException('هتل یافت نشد');
-
-    // View count tracking removed - field not in schema
 
     return hotel;
   }

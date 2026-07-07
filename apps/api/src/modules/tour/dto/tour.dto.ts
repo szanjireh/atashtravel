@@ -22,92 +22,26 @@ export class CreateTourDto {
 
   @ApiProperty()
   @IsString()
-  destinationId: string;
-
-  @ApiProperty()
-  @IsNumber()
-  @Type(() => Number)
-  duration: number;
-
-  @ApiProperty({ enum: ['days', 'hours'] })
-  @IsString()
-  durationType: string;
-
-  @ApiProperty()
-  @IsNumber()
-  @Type(() => Number)
-  @Min(0)
-  priceAdult: number;
-
-  @ApiProperty()
-  @IsNumber()
-  @Type(() => Number)
-  @Min(0)
-  priceChild: number;
-
-  @ApiProperty()
-  @IsNumber()
-  @Type(() => Number)
-  @Min(0)
-  priceInfant: number;
+  countryId: string;
 
   @ApiProperty()
   @IsString()
-  currency: string;
+  cityId: string;
 
-  @ApiProperty({ required: false })
-  @IsOptional()
+  @ApiProperty()
   @IsNumber()
   @Type(() => Number)
-  @Min(0)
-  @Max(100)
-  discount?: number;
+  durationDays: number;
 
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  included?: string[];
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  excluded?: string[];
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  meetingPoint?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  cancellationPolicy?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
+  @ApiProperty()
   @IsNumber()
   @Type(() => Number)
-  @Min(0)
-  minParticipants?: number;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
-  @Min(1)
-  maxParticipants?: number;
-
-  @ApiProperty({ required: false, default: true })
-  @IsOptional()
-  @IsBoolean()
-  isActive?: boolean;
+  durationNights: number;
 
   @ApiProperty({ required: false, default: false })
   @IsOptional()
   @IsBoolean()
-  isFeatured?: boolean;
+  featured?: boolean;
 }
 
 export class UpdateTourDto extends CreateTourDto {}

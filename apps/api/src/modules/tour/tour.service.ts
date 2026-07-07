@@ -19,35 +19,20 @@ export class TourService {
       throw new BadRequestException('این شناسه URL قبلا استفاده شده است');
     }
 
-    const { included, excluded, ...tourData } = dto;
-
     const tour = await this.prisma.tour.create({
       data: {
-        ...tourData,
-        status: dto.isActive ? 'published' : 'draft',
+        title: dto.title,
+        slug: dto.slug,
+        description: dto.description,
+        countryId: dto.countryId,
+        cityId: dto.cityId,
+        categoryId: dto.categoryId,
+        durationDays: dto.durationDays,
+        durationNights: dto.durationNights,
+        status: 'active',
+        featured: dto.featured || false,
       },
     });
-
-    // Create services (included/excluded)
-    if (included?.length) {
-      await this.prisma.tourService.createMany({
-        data: included.map((service) => ({
-          tourId: tour.id,
-          name: service,
-          isIncluded: true,
-        })),
-      });
-    }
-
-    if (excluded?.length) {
-      await this.prisma.tourService.createMany({
-        data: excluded.map((service) => ({
-          tourId: tour.id,
-          name: service,
-          isIncluded: false,
-        })),
-      });
-    }
 
     return this.findOne(tour.id);
   }
@@ -59,9 +44,6 @@ export class TourService {
     const {
       search,
       categoryId,
-      destinationId,
-      minPrice,
-      maxPrice,
       minDuration,
       maxDuration,
       sortBy = 'newest',
@@ -73,8 +55,7 @@ export class TourService {
 
     // Build where clause
     const where: any = {
-      status: 'published',
-      isActive: true,
+      status: 'active',
       deletedAt: null,
     };
 
@@ -89,42 +70,28 @@ export class TourService {
       where.categoryId = categoryId;
     }
 
-    if (destinationId) {
-      where.destinationId = destinationId;
-    }
-
-    if (minPrice !== undefined || maxPrice !== undefined) {
-      where.priceAdult = {};
-      if (minPrice !== undefined) where.priceAdult.gte = minPrice;
-      if (maxPrice !== undefined) where.priceAdult.lte = maxPrice;
-    }
-
     if (minDuration !== undefined || maxDuration !== undefined) {
-      where.duration = {};
-      if (minDuration !== undefined) where.duration.gte = minDuration;
-      if (maxDuration !== undefined) where.duration.lte = maxDuration;
+      where.durationDays = {};
+      if (minDuration !== undefined) where.durationDays.gte = minDuration;
+      if (maxDuration !== undefined) where.durationDays.lte = maxDuration;
     }
 
     // Build orderBy
     let orderBy: any = { createdAt: 'desc' };
     
     switch (sortBy) {
-      case 'price_asc':
-        orderBy = { priceAdult: 'asc' };
-        break;
-      case 'price_desc':
-        orderBy = { priceAdult: 'desc' };
-        break;
       case 'duration_asc':
-        orderBy = { duration: 'asc' };
+        orderBy = { durationDays: 'asc' };
         break;
       case 'duration_desc':
-        orderBy = { duration: 'desc' };
+        orderBy = { durationDays: 'desc' };
         break;
       case 'popular':
-        orderBy = { createdAt: 'desc' };
+      case 'featured':
+        orderBy = { featured: 'desc' };
         break;
       case 'newest':
+      default:
         orderBy = { createdAt: 'desc' };
         break;
     }
@@ -134,13 +101,9 @@ export class TourService {
         where,
         include: {
           category: true,
-          destination: true,
           images: {
             orderBy: { sortOrder: 'asc' },
             take: 1,
-          },
-          _count: {
-            select: { reviews: true },
           },
         },
         orderBy,
@@ -171,12 +134,8 @@ export class TourService {
       },
       include: {
         category: true,
-        destination: {
-          include: {
-            country: true,
-            city: true,
-          },
-        },
+        country: true,
+        city: true,
         images: {
           orderBy: { sortOrder: 'asc' },
         },
@@ -188,32 +147,15 @@ export class TourService {
         },
         dates: {
           where: {
-            startDate: { gte: new Date() },
+            departureDate: { gte: new Date() },
           },
-          orderBy: { startDate: 'asc' },
+          orderBy: { departureDate: 'asc' },
           take: 10,
         },
         tags: {
           include: {
             tag: true,
           },
-        },
-        reviews: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                avatar: true,
-              },
-            },
-          },
-          orderBy: { createdAt: 'desc' },
-          take: 10,
-        },
-        _count: {
-          select: { reviews: true, bookings: true },
         },
       },
     });
@@ -222,16 +164,7 @@ export class TourService {
       throw new NotFoundException('تور یافت نشد');
     }
 
-    // Calculate average rating
-    const avgRating = await this.prisma.review.aggregate({
-      where: { entityType: 'tour', entityId: tour.id },
-      _avg: { rating: true },
-    });
-
-    return {
-      ...tour,
-      averageRating: avgRating._avg.rating || 0,
-    };
+    return tour;
   }
 
   /**
@@ -257,48 +190,17 @@ export class TourService {
       }
     }
 
-    const { included, excluded, ...tourData } = dto;
-
     const updated = await this.prisma.tour.update({
       where: { id },
       data: {
-        ...tourData,
-        status: dto.isActive ? 'published' : 'draft',
+        ...(dto.title && { title: dto.title }),
+        ...(dto.slug && { slug: dto.slug }),
+        ...(dto.description && { description: dto.description }),
+        ...(dto.durationDays && { durationDays: dto.durationDays }),
+        ...(dto.durationNights && { durationNights: dto.durationNights }),
+        ...(typeof dto.featured !== 'undefined' && { featured: dto.featured }),
       },
     });
-
-    // Update services if provided
-    if (included !== undefined || excluded !== undefined) {
-      // Delete existing services
-      await this.prisma.tourService.deleteMany({
-        where: { tourId: id },
-      });
-
-      // Create new services
-      const services: any[] = [];
-      if (included?.length) {
-        services.push(
-          ...included.map((service) => ({
-            tourId: id,
-            name: service,
-            isIncluded: true,
-          })),
-        );
-      }
-      if (excluded?.length) {
-        services.push(
-          ...excluded.map((service) => ({
-            tourId: id,
-            name: service,
-            isIncluded: false,
-          })),
-        );
-      }
-
-      if (services.length) {
-        await this.prisma.tourService.createMany({ data: services });
-      }
-    }
 
     return this.findOne(updated.id);
   }
@@ -329,20 +231,18 @@ export class TourService {
   async getFeatured(limit = 6) {
     return this.prisma.tour.findMany({
       where: {
-        isFeatured: true,
-        isActive: true,
-        status: 'published',
+        featured: true,
+        status: 'active',
         deletedAt: null,
       },
       include: {
         category: true,
-        destination: true,
         images: {
           orderBy: { sortOrder: 'asc' },
           take: 1,
         },
       },
-      orderBy: { featured: 'desc' },
+      orderBy: { createdAt: 'desc' },
       take: limit,
     });
   }
@@ -353,19 +253,17 @@ export class TourService {
   async getPopular(limit = 10) {
     return this.prisma.tour.findMany({
       where: {
-        isActive: true,
-        status: 'published',
+        status: 'active',
         deletedAt: null,
       },
       include: {
         category: true,
-        destination: true,
         images: {
           orderBy: { sortOrder: 'asc' },
           take: 1,
         },
       },
-      orderBy: { featured: 'desc' },
+      orderBy: { createdAt: 'desc' },
       take: limit,
     });
   }

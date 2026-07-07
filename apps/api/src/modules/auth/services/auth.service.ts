@@ -69,7 +69,6 @@ export class AuthService {
       data: {
         userId: user.id,
         token: verificationToken,
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
       },
     });
 
@@ -240,13 +239,12 @@ export class AuthService {
     const verification = await this.prisma.emailVerification.findFirst({
       where: {
         token,
-        expiresAt: { gt: new Date() },
         verifiedAt: null,
       },
     });
 
     if (!verification) {
-      throw new BadRequestException('لینک تایید نامعتبر یا منقضی شده است');
+      throw new BadRequestException('لینک تایید نامعتبر است');
     }
 
     // Mark as verified

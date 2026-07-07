@@ -183,8 +183,8 @@ export class UserService {
     return this.prisma.traveler.findMany({
       where: { userId },
       include: {
-        passport: true,
-        emergencyContact: true,
+        passports: true,
+        emergencyContacts: true,
       },
       orderBy: { createdAt: 'desc' },
     });

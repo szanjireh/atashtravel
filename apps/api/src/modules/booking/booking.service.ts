@@ -6,26 +6,31 @@ export class BookingService {
   constructor(private prisma: PrismaService) {}
 
   async create(userId: string, dto: any) {
-    const { type, itemId, passengers, startDate } = dto;
+    const { bookingType, itemId, passengers } = dto;
 
     // Validate item exists and is available
-    let item: any;
     let totalAmount = 0;
 
-    if (type === 'tour') {
-      item = await this.prisma.tour.findUnique({ where: { id: itemId } });
-      if (!item) throw new BadRequestException('تور یافت نشد');
-      totalAmount = passengers.adults * item.priceAdult + passengers.children * item.priceChild + passengers.infants * item.priceInfant;
+    if (bookingType === 'tour') {
+      // Check if tour exists via tour dates
+      const tourDate = await this.prisma.tourDate.findUnique({
+        where: { id: itemId },
+        include: { tour: true },
+      });
+      if (!tourDate) throw new BadRequestException('تور یافت نشد');
+      totalAmount = tourDate.basePrice.toNumber();
     }
 
     // Create booking
     const booking = await this.prisma.booking.create({
       data: {
         userId,
-        type,
-        status: 'pending',
+        bookingType,
+        status: 'draft',
         totalAmount,
-        currency: item.currency || 'IRR',
+        subtotal: totalAmount,
+        currency: 'USD',
+        bookingNumber: `BK-${Date.now()}`,
       },
     });
 
@@ -33,11 +38,11 @@ export class BookingService {
     await this.prisma.bookingItem.create({
       data: {
         bookingId: booking.id,
-        itemType: type,
+        itemType: bookingType,
         itemId,
         quantity: 1,
-        price: totalAmount,
-        startDate: startDate ? new Date(startDate) : undefined,
+        unitPrice: totalAmount,
+        totalPrice: totalAmount,
       },
     });
 
@@ -56,7 +61,7 @@ export class BookingService {
         where,
         include: {
           items: true,
-          payment: true,
+          payments: true,
         },
         skip,
         take: Number(limit),
@@ -77,7 +82,7 @@ export class BookingService {
       include: {
         items: true,
         passengers: true,
-        payment: true,
+        payments: true,
         invoice: true,
         voucher: true,
       },
@@ -94,11 +99,10 @@ export class BookingService {
 
     if (!booking) throw new BadRequestException('رزرو یافت نشد');
     if (booking.status === 'cancelled') throw new BadRequestException('رزرو قبلا لغو شده است');
-    if (booking.status === 'completed') throw new BadRequestException('رزرو تکمیل شده قابل لغو نیست');
 
     await this.prisma.booking.update({
       where: { id },
-      data: { status: 'cancelled', cancelledAt: new Date() },
+      data: { status: 'cancelled' },
     });
 
     return { message: 'رزرو با موفقیت لغو شد' };

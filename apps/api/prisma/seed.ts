@@ -107,24 +107,22 @@ async function main() {
   // Create Countries
   console.log('Creating countries...');
   const iran = await prisma.country.upsert({
-    where: { code: 'IR' },
+    where: { iso2: 'IR' },
     update: {},
     create: {
-      code: 'IR',
+      iso2: 'IR',
+      iso3: 'IRN',
       name: 'ایران',
-      nameFa: 'ایران',
-      nameEn: 'Iran',
     },
   });
 
   const turkey = await prisma.country.upsert({
-    where: { code: 'TR' },
+    where: { iso2: 'TR' },
     update: {},
     create: {
-      code: 'TR',
+      iso2: 'TR',
+      iso3: 'TUR',
       name: 'ترکیه',
-      nameFa: 'ترکیه',
-      nameEn: 'Turkey',
     },
   });
 
@@ -132,28 +130,22 @@ async function main() {
 
   // Create Cities
   console.log('Creating cities...');
-  const tehran = await prisma.city.upsert({
-    where: { name: 'تهران' },
-    update: {},
-    create: {
+  const tehran = await prisma.city.create({
+    data: {
       name: 'تهران',
       countryId: iran.id,
     },
   });
 
-  const istanbul = await prisma.city.upsert({
-    where: { name: 'استانبول' },
-    update: {},
-    create: {
+  const istanbul = await prisma.city.create({
+    data: {
       name: 'استانبول',
       countryId: turkey.id,
     },
   });
 
-  const antalya = await prisma.city.upsert({
-    where: { name: 'آنتالیا' },
-    update: {},
-    create: {
+  const antalya = await prisma.city.create({
+    data: {
       name: 'آنتالیا',
       countryId: turkey.id,
     },
@@ -161,37 +153,13 @@ async function main() {
 
   console.log('✅ Cities created');
 
-  // Create Destinations
-  console.log('Creating destinations...');
-  const destination1 = await prisma.destination.create({
-    data: {
-      name: 'استانبول',
-      slug: 'istanbul',
-      description: 'شهر زیبای استانبول، پل بین شرق و غرب',
-      countryId: turkey.id,
-      cityId: istanbul.id,
-    },
-  });
-
-  const destination2 = await prisma.destination.create({
-    data: {
-      name: 'آنتالیا',
-      slug: 'antalya',
-      description: 'بهشت ساحلی ترکیه',
-      countryId: turkey.id,
-      cityId: antalya.id,
-    },
-  });
-
-  console.log('✅ Destinations created');
-
   // Create Tour Categories
   console.log('Creating tour categories...');
   const tourCategory = await prisma.tourCategory.create({
     data: {
       name: 'تور ترکیه',
       slug: 'turkey-tours',
-      description: 'تورهای گردشگری ترکیه',
+      sortOrder: 1,
     },
   });
 
@@ -206,22 +174,12 @@ async function main() {
       slug: 'istanbul-7-days',
       description: 'تور کامل استانبول با بازدید از جاذبه‌های تاریخی و مدرن شهر',
       categoryId: tourCategory.id,
-      destinationId: destination1.id,
-      duration: 7,
-      durationType: 'days',
-      priceAdult: 25000000,
-      priceChild: 18000000,
-      priceInfant: 5000000,
-      currency: 'IRR',
-      status: 'published',
-      isActive: true,
-      isFeatured: true,
-      minParticipants: 10,
-      maxParticipants: 40,
-      included: ['پرواز رفت و برگشت', 'هتل 4 ستاره', 'صبحانه', 'گاید فارسی زبان'],
-      excluded: ['بیمه مسافرتی', 'ویزا', 'ناهار و شام'],
-      meetingPoint: 'فرودگاه امام خمینی (ره)',
-      cancellationPolicy: 'تا 7 روز قبل از سفر: کنسلی رایگان، کمتر از 7 روز: 50 درصد هزینه',
+      countryId: turkey.id,
+      cityId: istanbul.id,
+      durationDays: 7,
+      durationNights: 6,
+      status: 'active',
+      featured: true,
     },
   });
 
@@ -231,22 +189,12 @@ async function main() {
       slug: 'antalya-5-days',
       description: 'تور ساحلی آنتالیا با اقامت در هتل‌های لوکس ساحلی',
       categoryId: tourCategory.id,
-      destinationId: destination2.id,
-      duration: 5,
-      durationType: 'days',
-      priceAdult: 18000000,
-      priceChild: 13000000,
-      priceInfant: 4000000,
-      currency: 'IRR',
-      status: 'published',
-      isActive: true,
-      isFeatured: true,
-      minParticipants: 10,
-      maxParticipants: 35,
-      included: ['پرواز رفت و برگشت', 'هتل 5 ستاره ساحلی', 'صبحانه و شام', 'گاید فارسی زبان'],
-      excluded: ['بیمه مسافرتی', 'ویزا', 'ناهار'],
-      meetingPoint: 'فرودگاه امام خمینی (ره)',
-      cancellationPolicy: 'تا 7 روز قبل از سفر: کنسلی رایگان، کمتر از 7 روز: 50 درصد هزینه',
+      countryId: turkey.id,
+      cityId: antalya.id,
+      durationDays: 5,
+      durationNights: 4,
+      status: 'active',
+      featured: true,
     },
   });
 
@@ -297,9 +245,8 @@ async function main() {
     create: {
       code: 'fa',
       name: 'فارسی',
-      nativeName: 'فارسی',
       isRtl: true,
-      isActive: true,
+      isDefault: true,
     },
   });
 
@@ -309,9 +256,8 @@ async function main() {
     create: {
       code: 'en',
       name: 'English',
-      nativeName: 'English',
       isRtl: false,
-      isActive: true,
+      isDefault: false,
     },
   });
 
