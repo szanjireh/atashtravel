@@ -35,11 +35,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
       code = exception.name;
     }
     // Handle Prisma errors
-    else if (exception instanceof Prisma.PrismaClientKnownRequestError) {
+    else if ((exception as any).code && typeof (exception as any).code === 'string' && (exception as any).code.startsWith('P')) {
       status = HttpStatus.BAD_REQUEST;
-      code = exception.code;
+      const prismaCode = (exception as any).code;
+      code = prismaCode;
 
-      switch (exception.code) {
+      switch (prismaCode) {
         case 'P2002':
           message = 'Unique constraint violation';
           status = HttpStatus.CONFLICT;
@@ -59,7 +60,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       }
     }
     // Handle Prisma validation errors
-    else if (exception instanceof Prisma.PrismaClientValidationError) {
+    else if ((exception as any).name === 'PrismaClientValidationError') {
       status = HttpStatus.BAD_REQUEST;
       message = 'Validation error';
       code = 'VALIDATION_ERROR';

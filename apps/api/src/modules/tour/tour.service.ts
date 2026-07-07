@@ -275,7 +275,7 @@ export class TourService {
       });
 
       // Create new services
-      const services = [];
+      const services: any[] = [];
       if (included?.length) {
         services.push(
           ...included.map((service) => ({

@@ -1,11 +1,11 @@
 export default () => ({
-  port: parseInt(process.env.PORT, 10) || 4000,
+  port: parseInt(process.env.PORT || '4000', 10) || 4000,
   database: {
     url: process.env.DATABASE_URL,
   },
   redis: {
     host: process.env.REDIS_HOST || 'localhost',
-    port: parseInt(process.env.REDIS_PORT, 10) || 6379,
+    port: parseInt(process.env.REDIS_PORT || '6379', 10) || 6379,
   },
   jwt: {
     secret: process.env.JWT_SECRET || 'super-secret-key-change-in-production',
@@ -15,7 +15,7 @@ export default () => ({
   },
   minio: {
     endPoint: process.env.MINIO_ENDPOINT || 'localhost',
-    port: parseInt(process.env.MINIO_PORT, 10) || 9000,
+    port: parseInt(process.env.MINIO_PORT || '9000', 10) || 9000,
     useSSL: process.env.MINIO_USE_SSL === 'true',
     accessKey: process.env.MINIO_ACCESS_KEY || 'minioadmin',
     secretKey: process.env.MINIO_SECRET_KEY || 'minioadmin',
@@ -23,7 +23,7 @@ export default () => ({
   },
   email: {
     host: process.env.EMAIL_HOST,
-    port: parseInt(process.env.EMAIL_PORT, 10) || 587,
+    port: parseInt(process.env.EMAIL_PORT || '587', 10) || 587,
     user: process.env.EMAIL_USER,
     password: process.env.EMAIL_PASSWORD,
     from: process.env.EMAIL_FROM || 'noreply@atashtravel.com',
