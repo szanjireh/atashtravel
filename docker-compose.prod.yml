@@ -1,0 +1,24 @@
+services:
+  # ------------------------------------------
+  # Nginx — serves the static Atash Travel site
+  # ------------------------------------------
+  atashtravel:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: atashtravel
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    networks:
+      - talaseen-network
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+
+networks:
+  talaseen-network:
+    external: true

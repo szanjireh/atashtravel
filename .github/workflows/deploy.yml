@@ -47,7 +47,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Validate Docker Compose
-        run: docker compose config
+        run: docker compose -f docker-compose.prod.yml config
 
   # ─────────────────────────────────────────────
   # 3. Deploy to server
@@ -85,16 +85,16 @@ jobs:
             GIT_SSH_COMMAND="ssh -i ~/.ssh/githubsajad -o StrictHostKeyChecking=accept-new" git pull origin main
 
             echo "→ Rebuilding Docker Compose services on the host..."
-            docker compose build --no-cache
+            docker compose -f docker-compose.prod.yml build --no-cache
 
             echo "→ Tearing down any existing stack to free ports..."
-            docker compose down --remove-orphans || true
+            docker compose -f docker-compose.prod.yml down --remove-orphans || true
 
             echo "→ Ensuring talaseen-network exists..."
             docker network inspect talaseen-network >/dev/null 2>&1 || docker network create talaseen-network
 
             echo "→ Starting / updating container..."
-            docker compose up -d --remove-orphans
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
 
             # ── SSL provisioning (first-time only) ──────────────────────────
             if [[ "${{ github.event.inputs.provision_ssl }}" == "true" ]]; then
