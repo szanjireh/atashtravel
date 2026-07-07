@@ -59,7 +59,7 @@ export class HotelService {
 
     if (!hotel) throw new NotFoundException('هتل یافت نشد');
 
-    await this.prisma.hotel.update({ where: { id: hotel.id }, data: { viewCount: { increment: 1 } } });
+    // View count tracking removed - field not in schema
 
     return hotel;
   }

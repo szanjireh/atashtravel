@@ -21,9 +21,7 @@ export class UserService {
           include: { role: true },
         },
         wallet: true,
-        loyaltyAccount: {
-          include: { level: true },
-        },
+        loyaltyAccount: true,
       },
     });
 
@@ -211,9 +209,9 @@ export class UserService {
       await this.prisma.passport.create({
         data: {
           travelerId: traveler.id,
-          passportNumber,
-          nationality: dto.nationality,
-          expiryDate: passportExpiry ? new Date(passportExpiry) : undefined,
+          passport: passportNumber,
+          country: dto.nationality || 'Unknown',
+          expiryDate: passportExpiry ? new Date(passportExpiry) : new Date(),
         },
       });
     }
@@ -253,18 +251,18 @@ export class UserService {
         await this.prisma.passport.update({
           where: { id: existingPassport.id },
           data: {
-            passportNumber,
-            nationality: dto.nationality,
-            expiryDate: passportExpiry ? new Date(passportExpiry) : undefined,
+            passport: passportNumber,
+            country: dto.nationality || 'Unknown',
+            expiryDate: passportExpiry ? new Date(passportExpiry) : existingPassport.expiryDate,
           },
         });
       } else {
         await this.prisma.passport.create({
           data: {
             travelerId,
-            passportNumber,
-            nationality: dto.nationality,
-            expiryDate: passportExpiry ? new Date(passportExpiry) : undefined,
+            passport: passportNumber,
+            country: dto.nationality || 'Unknown',
+            expiryDate: passportExpiry ? new Date(passportExpiry) : new Date(),
           },
         });
       }

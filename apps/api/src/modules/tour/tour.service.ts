@@ -122,7 +122,7 @@ export class TourService {
         orderBy = { duration: 'desc' };
         break;
       case 'popular':
-        orderBy = { viewCount: 'desc' };
+        orderBy = { createdAt: 'desc' };
         break;
       case 'newest':
         orderBy = { createdAt: 'desc' };
@@ -221,12 +221,6 @@ export class TourService {
     if (!tour) {
       throw new NotFoundException('تور یافت نشد');
     }
-
-    // Increment view count
-    await this.prisma.tour.update({
-      where: { id: tour.id },
-      data: { viewCount: { increment: 1 } },
-    });
 
     // Calculate average rating
     const avgRating = await this.prisma.review.aggregate({
@@ -348,7 +342,7 @@ export class TourService {
           take: 1,
         },
       },
-      orderBy: { viewCount: 'desc' },
+      orderBy: { featured: 'desc' },
       take: limit,
     });
   }
@@ -371,7 +365,7 @@ export class TourService {
           take: 1,
         },
       },
-      orderBy: { viewCount: 'desc' },
+      orderBy: { featured: 'desc' },
       take: limit,
     });
   }
