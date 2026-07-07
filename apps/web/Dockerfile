@@ -77,9 +77,10 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Copy necessary files from build stage
-COPY --from=build --chown=nextjs:nodejs /app/apps/web/public ./public
+# Standalone output includes the full workspace structure
 COPY --from=build --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
-COPY --from=build --chown=nextjs:nodejs /app/apps/web/.next/static ./.next/static
+COPY --from=build --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=build --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
 
 # Switch to non-root user
 USER nextjs
@@ -91,6 +92,6 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
-# Start the application (Next.js standalone server)
+# Start the application (Next.js standalone server at root level)
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", ".next/standalone/server.js"]
+CMD ["node", "server.js"]

@@ -67,8 +67,12 @@ RUN npx prisma generate --schema=./apps/api/prisma/schema.prisma
 # Copy source code
 COPY apps/api/ ./apps/api/
 
-# Build the application
-RUN npm run build --workspace=api
+# Build the application (change to api directory to run nest build)
+WORKDIR /app/apps/api
+RUN npm run build
+
+# Return to app root
+WORKDIR /app
 
 # Clean up build dependencies
 RUN apt-get purge -y --auto-remove python3 build-essential && \
