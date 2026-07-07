@@ -126,12 +126,19 @@ docker compose build --progress=plain
 ```bash
 # Commit تغییرات
 git add .
-git commit -m "fix: resolve Dockerfile COPY syntax error
+git commit -m "fix: resolve Docker build errors (EIDLETIMEOUT + npm ci)
 
+Critical fixes:
+- Add .npmrc with 10min timeout and 5 retry attempts
+- Remove package-lock.json from .dockerignore (required for npm ci)
+- Add explicit COPY of package-lock.json in Dockerfiles
+- Optimize Dockerfiles with BuildKit cache mounts
+- Add 3x retry logic for npm ci commands
+- Enable DOCKER_BUILDKIT in GitHub Actions workflow
+- Add .dockerignore files to reduce build context
 - Remove invalid shell operators from COPY commands
-- Use only root .npmrc in Docker build (npm inherits from parent)
-- Fix '/||': not found error in BuildKit
-- Simplify Dockerfile by removing redundant .npmrc copies"
+
+Resolves: EIDLETIMEOUT, npm ci lock file missing, /||: not found"
 
 # Push به GitHub
 git push origin main
@@ -146,12 +153,14 @@ GitHub Actions به صورت اتوماتیک اجرا می‌شود.
 - ✅ [.npmrc](.npmrc) - جدید
 - ✅ [apps/api/.npmrc](apps/api/.npmrc) - جدید
 - ✅ [apps/web/.npmrc](apps/web/.npmrc) - جدید
-- ✅ [.dockerignore](.dockerignore) - جدید
+- ✅ [.dockerignore](.dockerignore) - جدید (package-lock.json NOT ignored)
 - ✅ [apps/api/.dockerignore](apps/api/.dockerignore) - جدید
 - ✅ [apps/web/.dockerignore](apps/web/.dockerignore) - جدید
 - ✅ [apps/api/Dockerfile](apps/api/Dockerfile) - بهینه‌سازی
 - ✅ [apps/web/Dockerfile](apps/web/Dockerfile) - بهینه‌سازی
 - ✅ [.github/workflows/deploy.yml](.github/workflows/deploy.yml) - بهینه‌سازی
+
+**⚠️ نکته مهم:** `package-lock.json` نباید در `.dockerignore` باشد زیرا `npm ci` به آن نیاز دارد!
 
 ---
 
