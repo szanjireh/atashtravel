@@ -12,7 +12,6 @@ RUN apt-get update && \
 
 # Copy npm config for timeout settings
 COPY .npmrc ./
-COPY apps/api/.npmrc ./apps/api/
 
 # Copy root package files for workspace
 COPY package*.json ./
@@ -46,7 +45,6 @@ RUN apt-get update && \
 
 # Copy npm config for timeout settings
 COPY .npmrc ./
-COPY apps/api/.npmrc ./apps/api/
 
 # Copy root package files
 COPY package*.json ./

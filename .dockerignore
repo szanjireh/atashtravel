@@ -15,7 +15,6 @@ out/
 # Cache
 .turbo/
 .cache/
-.npm/
 .yarn/
 
 # Environment files
@@ -25,6 +24,9 @@ out/
 .env.test.local
 .env.production.local
 .env*.local
+
+# Note: .npmrc in root is needed for Docker build
+# apps/*/.npmrc files are optional (npm uses parent .npmrc)
 
 # IDE
 .vscode/

@@ -17,9 +17,11 @@ npm error Idle timeout reached for host `registry.npmjs.org:443`
 ### 1️⃣ **فایل‌های `.npmrc` با تنظیمات Timeout**
 
 ایجاد 3 فایل `.npmrc`:
-- [.npmrc](.npmrc) - Root workspace
-- [apps/api/.npmrc](apps/api/.npmrc) - Backend
-- [apps/web/.npmrc](apps/web/.npmrc) - Frontend
+- [.npmrc](.npmrc) - Root workspace (استفاده می‌شود در Docker build)
+- [apps/api/.npmrc](apps/api/.npmrc) - Backend (اختیاری - برای development محلی)
+- [apps/web/.npmrc](apps/web/.npmrc) - Frontend (اختیاری - برای development محلی)
+
+**نکته مهم**: در Docker build فقط root `.npmrc` کپی می‌شود و npm به صورت اتوماتیک از آن استفاده می‌کند.
 
 **تنظیمات اعمال شده:**
 ```properties
@@ -48,7 +50,7 @@ RUN --mount=type=cache,target=/root/.npm \
 - ✅ **BuildKit Cache Mount**: Cache کردن `/root/.npm` برای استفاده مجدد
 - ✅ **Retry Logic**: 3 بار تلاش خودکار در صورت fail
 - ✅ **جداسازی Layers**: نصب dependencies و cleanup در RUN های جداگانه
-- ✅ **کپی `.npmrc`**: قبل از npm ci برای اعمال تنظیمات
+- ✅ **کپی `.npmrc`**: فقط root `.npmrc` کپی می‌شود (npm از parent استفاده می‌کند)
 
 #### Frontend ([apps/web/Dockerfile](apps/web/Dockerfile)):
 همان pattern اعمال شد.
@@ -124,14 +126,12 @@ docker compose build --progress=plain
 ```bash
 # Commit تغییرات
 git add .
-git commit -m "fix: resolve Docker build timeout with npm EIDLETIMEOUT
+git commit -m "fix: resolve Dockerfile COPY syntax error
 
-- Add .npmrc with increased timeout (10min) and retry logic
-- Optimize Dockerfiles with BuildKit cache mounts
-- Add retry mechanism (3 attempts) for npm ci
-- Enable Docker BuildKit in GitHub Actions
-- Add .dockerignore files to reduce context size
-- Remove --no-cache to leverage build cache"
+- Remove invalid shell operators from COPY commands
+- Use only root .npmrc in Docker build (npm inherits from parent)
+- Fix '/||': not found error in BuildKit
+- Simplify Dockerfile by removing redundant .npmrc copies"
 
 # Push به GitHub
 git push origin main
