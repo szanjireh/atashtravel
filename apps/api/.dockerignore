@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+
+# Environment files
+.env*
+
+# IDE
+.vscode/
+.idea/
+
+# Tests
+test/
+*.test.ts
+*.spec.ts
+coverage/
+
+# Documentation
+*.md
+README*
+
+# Misc
+.prettierrc
+.eslintrc
+tsconfig.tsbuildinfo

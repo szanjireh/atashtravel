@@ -5,20 +5,32 @@ FROM node:20-slim AS dependencies
 
 WORKDIR /app
 
+# Install build dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends python3 build-essential && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy npm config for timeout settings
+COPY .npmrc ./
+COPY apps/api/.npmrc ./apps/api/
+
 # Copy root package files for workspace
 COPY package*.json ./
 
 # Copy workspace package files
 COPY apps/api/package*.json ./apps/api/
 
-# Install only production dependencies for API workspace
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends python3 build-essential && \
+# Install only production dependencies with BuildKit cache mount
+# Retry npm ci up to 3 times on failure
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --workspace=api --omit=dev || \
+    npm ci --workspace=api --omit=dev || \
+    npm ci --workspace=api --omit=dev
+
+# Clean up build dependencies
+RUN apt-get purge -y --auto-remove python3 build-essential && \
     rm -rf /var/lib/apt/lists/* && \
-    npm ci --workspace=api --omit=dev && \
-    npm cache clean --force && \
-    apt-get purge -y --auto-remove python3 build-essential && \
-    rm -rf /var/lib/apt/lists/*
+    npm cache clean --force
 
 # ==================================
 # Stage 2: Build
@@ -27,16 +39,25 @@ FROM node:20-slim AS build
 
 WORKDIR /app
 
+# Install build dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends python3 build-essential && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy npm config for timeout settings
+COPY .npmrc ./
+COPY apps/api/.npmrc ./apps/api/
+
 # Copy root package files
 COPY package*.json ./
 
 # Copy workspace package files
 COPY apps/api/package*.json ./apps/api/
 
-# Install all dependencies (including dev) for API
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends python3 build-essential && \
-    rm -rf /var/lib/apt/lists/* && \
+# Install all dependencies (including dev) with cache mount and retry
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --workspace=api || \
+    npm ci --workspace=api || \
     npm ci --workspace=api
 
 # Copy Prisma schema
@@ -50,6 +71,10 @@ COPY apps/api/ ./apps/api/
 
 # Build the application
 RUN npm run build --workspace=api
+
+# Clean up build dependencies
+RUN apt-get purge -y --auto-remove python3 build-essential && \
+    rm -rf /var/lib/apt/lists/*
 
 # ==================================
 # Stage 3: Production

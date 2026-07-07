@@ -5,15 +5,24 @@ FROM node:20-alpine AS dependencies
 
 WORKDIR /app
 
+# Copy npm config for timeout settings
+COPY .npmrc ./
+COPY apps/web/.npmrc ./apps/web/ 2>/dev/null || :
+
 # Copy root package files for workspace
 COPY package*.json ./
 
 # Copy workspace package files
 COPY apps/web/package*.json ./apps/web/
 
-# Install dependencies for web workspace
-RUN npm ci --workspace=web && \
-    npm cache clean --force
+# Install dependencies with cache mount and retry
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --workspace=web || \
+    npm ci --workspace=web || \
+    npm ci --workspace=web
+
+# Clean cache
+RUN npm cache clean --force
 
 # ==================================
 # Stage 2: Build
@@ -22,14 +31,21 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 
+# Copy npm config for timeout settings
+COPY .npmrc ./
+COPY apps/web/.npmrc ./apps/web/ 2>/dev/null || :
+
 # Copy root package files
 COPY package*.json ./
 
 # Copy workspace package files
 COPY apps/web/package*.json ./apps/web/
 
-# Install all dependencies
-RUN npm ci --workspace=web
+# Install all dependencies with cache mount and retry
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --workspace=web || \
+    npm ci --workspace=web || \
+    npm ci --workspace=web
 
 # Copy source code
 COPY apps/web/ ./apps/web/
