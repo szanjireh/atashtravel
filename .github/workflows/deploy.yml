@@ -88,6 +88,9 @@ jobs:
             export DOCKER_BUILDKIT=1
             export COMPOSE_DOCKER_CLI_BUILD=1
 
+            echo "→ Authenticating with Docker Hub..."
+            echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USER }}" --password-stdin
+
             echo "→ Rebuilding Docker Compose services with BuildKit..."
             docker compose build --progress=plain
 
