@@ -59,12 +59,8 @@ RUN npm ci --workspace=api || \
 # Copy Prisma schema
 COPY apps/api/prisma ./apps/api/prisma/
 
-# Generate Prisma Client (from workspace directory to ensure correct node_modules location)
-WORKDIR /app/apps/api
-RUN npx prisma generate
-
-# Return to app root
-WORKDIR /app
+# Generate Prisma Client (npm workspace hoists to root node_modules)
+RUN npx prisma generate --schema=./apps/api/prisma/schema.prisma
 
 # Copy source code
 COPY apps/api/ ./apps/api/
@@ -102,9 +98,9 @@ COPY --from=dependencies --chown=nestjs:nodejs /app/package*.json ./
 # Copy dependencies from dependencies stage
 COPY --from=dependencies --chown=nestjs:nodejs /app/node_modules ./node_modules
 
-# Copy generated Prisma Client from build stage workspace (generated from workspace directory)
-COPY --from=build --chown=nestjs:nodejs /app/apps/api/node_modules/.prisma ./node_modules/.prisma
-COPY --from=build --chown=nestjs:nodejs /app/apps/api/node_modules/@prisma/client ./node_modules/@prisma/client
+# Copy generated Prisma Client from build stage (npm workspace hoists to root node_modules)
+COPY --from=build --chown=nestjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=build --chown=nestjs:nodejs /app/node_modules/@prisma/client ./node_modules/@prisma/client
 
 # Copy built application from build stage
 COPY --from=build --chown=nestjs:nodejs /app/apps/api/dist ./dist
