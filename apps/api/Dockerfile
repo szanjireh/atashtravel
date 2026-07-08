@@ -98,6 +98,10 @@ COPY --from=dependencies --chown=nestjs:nodejs /app/package*.json ./
 # Copy dependencies from dependencies stage
 COPY --from=dependencies --chown=nestjs:nodejs /app/node_modules ./node_modules
 
+# Copy generated Prisma Client from build stage (generated during build)
+COPY --from=build --chown=nestjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=build --chown=nestjs:nodejs /app/node_modules/@prisma/client ./node_modules/@prisma/client
+
 # Copy built application from build stage
 COPY --from=build --chown=nestjs:nodejs /app/apps/api/dist ./dist
 COPY --from=build --chown=nestjs:nodejs /app/apps/api/prisma ./prisma
