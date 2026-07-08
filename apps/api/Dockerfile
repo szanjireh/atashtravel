@@ -83,9 +83,9 @@ FROM node:20-slim AS production
 
 WORKDIR /app
 
-# Install dumb-init for proper signal handling
+# Install dumb-init and OpenSSL for Prisma
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends dumb-init && \
+    apt-get install -y --no-install-recommends dumb-init openssl && \
     rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
