@@ -19,10 +19,9 @@ COPY package.json package-lock.json ./
 # Copy workspace package files
 COPY apps/api/package*.json ./apps/api/
 
-# Install only production dependencies with BuildKit cache mount
+# Install only production dependencies
 # Retry npm ci up to 3 times on failure
-RUN --mount=type=cache,target=/root/.npm \
-    npm ci --workspace=api --omit=dev || \
+RUN npm ci --workspace=api --omit=dev || \
     npm ci --workspace=api --omit=dev || \
     npm ci --workspace=api --omit=dev
 
@@ -52,9 +51,8 @@ COPY package.json package-lock.json ./
 # Copy workspace package files
 COPY apps/api/package*.json ./apps/api/
 
-# Install all dependencies (including dev) with cache mount and retry
-RUN --mount=type=cache,target=/root/.npm \
-    npm ci --workspace=api || \
+# Install all dependencies (including dev) with retry
+RUN npm ci --workspace=api || \
     npm ci --workspace=api || \
     npm ci --workspace=api
 

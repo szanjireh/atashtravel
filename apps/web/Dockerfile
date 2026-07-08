@@ -1,7 +1,7 @@
 # ==================================
 # Stage 1: Dependencies
 # ==================================
-FROM node:20-alpine AS dependencies
+FROM node:20-slim AS dependencies
 
 WORKDIR /app
 
@@ -14,9 +14,8 @@ COPY package.json package-lock.json ./
 # Copy workspace package files
 COPY apps/web/package*.json ./apps/web/
 
-# Install dependencies with cache mount and retry
-RUN --mount=type=cache,target=/root/.npm \
-    npm ci --workspace=web || \
+# Install dependencies with retry
+RUN npm ci --workspace=web || \
     npm ci --workspace=web || \
     npm ci --workspace=web
 
@@ -26,7 +25,7 @@ RUN npm cache clean --force
 # ==================================
 # Stage 2: Build
 # ==================================
-FROM node:20-alpine AS build
+FROM node:20-slim AS build
 
 WORKDIR /app
 
@@ -39,9 +38,8 @@ COPY package.json package-lock.json ./
 # Copy workspace package files
 COPY apps/web/package*.json ./apps/web/
 
-# Install all dependencies with cache mount and retry
-RUN --mount=type=cache,target=/root/.npm \
-    npm ci --workspace=web || \
+# Install all dependencies with retry
+RUN npm ci --workspace=web || \
     npm ci --workspace=web || \
     npm ci --workspace=web
 
@@ -62,28 +60,29 @@ RUN npm run build --workspace=web
 # ==================================
 # Stage 3: Production
 # ==================================
-FROM node:20-alpine AS production
+FROM node:20-slim AS production
 
 WORKDIR /app
 
 # Install dumb-init
-RUN apk add --no-cache dumb-init
+RUN apt-get update && apt-get install -y --no-install-recommends dumb-init && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nextjs -u 1001
+RUN groupadd -g 1001 nodejs && \
+    useradd -u 1001 -g nodejs -m -s /bin/bash nextjs
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Copy necessary files from build stage
-# Standalone output includes the full workspace structure
+# Standalone output includes the full workspace structure (apps/web/server.js + node_modules)
 COPY --from=build --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
-COPY --from=build --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=build --chown=nextjs:nodejs /app/apps/web/.next/standalone/apps/web/server.js ./
+COPY --from=build --chown=nextjs:nodejs /app/apps/web/.next ./apps/web/.next
 COPY --from=build --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
 
-# Switch to non-root user
-USER nextjs
+# Create symlink so server.js can find .next at root level
+RUN mkdir -p /app && ln -s /app/apps/web/.next /app/.next || true
 
 # Expose port
 EXPOSE 3000
@@ -92,6 +91,6 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
-# Start the application (Next.js standalone server at root level)
+# Start the application
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", "server.js"]
