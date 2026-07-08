@@ -93,14 +93,10 @@ RUN groupadd -g 1001 nodejs && \
     useradd -m -u 1001 -g nodejs nestjs
 
 # Copy root package files
-COPY --from=dependencies --chown=nestjs:nodejs /app/package*.json ./
+COPY --from=build --chown=nestjs:nodejs /app/package*.json ./
 
-# Copy dependencies from dependencies stage
-COPY --from=dependencies --chown=nestjs:nodejs /app/node_modules ./node_modules
-
-# Copy generated Prisma Client from build stage (npm workspace hoists to root node_modules)
-COPY --from=build --chown=nestjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=build --chown=nestjs:nodejs /app/node_modules/@prisma/client ./node_modules/@prisma/client
+# Copy ALL node_modules from build stage (includes generated Prisma Client)
+COPY --from=build --chown=nestjs:nodejs /app/node_modules ./node_modules
 
 # Copy built application from build stage
 COPY --from=build --chown=nestjs:nodejs /app/apps/api/dist ./dist
