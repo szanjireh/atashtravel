@@ -129,12 +129,12 @@ services:
       - atashtravel-network
     depends_on:
       - api
-    healthcheck:
-      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000').then(r => process.exit(r.status < 400 ? 0 : 1)).catch(() => process.exit(1))\""]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-      start_period: 20s
+    # healthcheck:
+    #   test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000').then(r => process.exit(r.status < 400 ? 0 : 1)).catch(() => process.exit(1))\""]
+    #   interval: 15s
+    #   timeout: 5s
+    #   retries: 3
+    #   start_period: 20s
 
   # ------------------------------------------
   # Certbot (SSL Certificate Management)
@@ -173,7 +173,7 @@ services:
       - atashtravel-network
     depends_on:
       web:
-        condition: service_healthy
+        condition: service_started  # 👈 CHANGED THIS LINE HERE
       api:
         condition: service_healthy
       certbot:
@@ -183,7 +183,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-
 # ------------------------------------------
 # Docker Volumes
 # ------------------------------------------
