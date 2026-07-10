@@ -85,7 +85,9 @@ jobs:
             export GIT_SSH_COMMAND="ssh -i ~/.ssh/githubsajad -o StrictHostKeyChecking=accept-new"
             git fetch origin main
             git reset --hard origin/main
-            git clean -fd
+            # git clean -fd
+            git clean -fdx -e certbot/conf
+
 
             echo "→ Tearing down any existing stack to free ports..."
             docker compose down --remove-orphans || true
