@@ -75,20 +75,20 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Copy necessary files from build stage
-# Standalone output includes the full workspace structure (apps/web/server.js + node_modules)
-COPY --from=build --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
-COPY --from=build --chown=nextjs:nodejs /app/apps/web/.next/standalone/apps/web/server.js ./
-COPY --from=build --chown=nextjs:nodejs /app/apps/web/.next ./apps/web/.next
-COPY --from=build --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
+# Standalone output includes the full workspace structure
+COPY --from=build --chown=nextjs:nodejs /app/apps/web/.next/standalone /app
+COPY --from=build --chown=nextjs:nodejs /app/apps/web/.next/static /app/apps/web/.next/static
+COPY --from=build --chown=nextjs:nodejs /app/apps/web/public /app/apps/web/public
 
-# Create symlink so server.js can find .next at root level
-RUN mkdir -p /app && ln -s /app/apps/web/.next /app/.next || true
+# Ensure .next is accessible from root for server.js
+RUN mkdir -p /app/.next && \
+    ln -s /app/apps/web/.next/static /app/.next/static || true
 
 # Expose port
 EXPOSE 3000
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=5 \
   CMD node -e "require('http').get('http://localhost:3000', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
 # Start the application

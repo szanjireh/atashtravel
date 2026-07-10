@@ -59,18 +59,15 @@ RUN npm ci --workspace=api || \
 # Copy Prisma schema
 COPY apps/api/prisma ./apps/api/prisma/
 
-# Generate Prisma Client (npm workspace hoists to root node_modules)
+# Generate Prisma Client (requires DATABASE_URL even though not connecting)
+ENV DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/placeholder"
 RUN npx prisma generate --schema=./apps/api/prisma/schema.prisma
 
 # Copy source code
 COPY apps/api/ ./apps/api/
 
-# Build the application (change to api directory to run nest build)
-WORKDIR /app/apps/api
-RUN npm run build
-
-# Return to app root
-WORKDIR /app
+# Build the application using workspace syntax from root
+RUN npm run build --workspace=api
 
 # Clean up build dependencies
 RUN apt-get purge -y --auto-remove python3 build-essential && \
@@ -83,9 +80,9 @@ FROM node:20-slim AS production
 
 WORKDIR /app
 
-# Install dumb-init and OpenSSL for Prisma
+# Install dumb-init, OpenSSL, and curl for health checks
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends dumb-init openssl && \
+    apt-get install -y --no-install-recommends dumb-init openssl curl && \
     rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
@@ -110,9 +107,9 @@ USER nestjs
 EXPOSE 4000
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=5 \
   CMD node -e "require('http').get('http://localhost:4000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
 # Start the application using dumb-init
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "dist/main"]
+CMD ["node", "dist/main.js"]
