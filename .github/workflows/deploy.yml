@@ -82,7 +82,10 @@ jobs:
 
             echo "→ Pulling latest configurations using explicit identity..."
             cd ${{ secrets.ATASHTRAVEL_PATH }}
-            GIT_SSH_COMMAND="ssh -i ~/.ssh/githubsajad -o StrictHostKeyChecking=accept-new" git pull origin main
+            export GIT_SSH_COMMAND="ssh -i ~/.ssh/githubsajad -o StrictHostKeyChecking=accept-new"
+            git fetch origin main
+            git reset --hard origin/main
+            git clean -fd
 
             echo "→ Tearing down any existing stack to free ports..."
             docker compose down --remove-orphans || true
