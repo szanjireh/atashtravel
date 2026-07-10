@@ -29,6 +29,8 @@ if [ ! -f "$CERTDIR/fullchain.pem" ]; then
     echo "  This will be replaced by a real certificate when provision_ssl=true"
 fi
 
-# Keep container alive
-trap exit TERM
-while :; do sleep 6h & wait $${!}; done
+# Keep container alive (POSIX sh compatible, no Bash constructs)
+trap 'exit 0' TERM
+while true; do
+    sleep 6h
+done
