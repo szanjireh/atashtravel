@@ -97,8 +97,11 @@ jobs:
             sleep 5
 
             # ── SSL provisioning (first-time only) ──────────────────────────
+            # On first deployment, certbot generates a self-signed cert automatically,
+            # allowing nginx to start. This provisioning step replaces it with a real one.
             if [[ "${{ github.event.inputs.provision_ssl }}" == "true" ]]; then
-              echo "→ Provisioning SSL certificate for atashtravel.com..."
+              echo "→ Provisioning Let's Encrypt certificate for atashtravel.com..."
+              echo "  (replacing temporary self-signed cert with production cert)"
 
               # Verify certbot container is running
               if ! docker ps | grep talaseen-certbot >/dev/null; then
@@ -106,10 +109,10 @@ jobs:
                 exit 1
               fi
 
-              echo "→ Creating certbot directories..."
+              echo "→ Creating certbot challenge directories..."
               docker exec talaseen-certbot mkdir -p /var/www/certbot
 
-              echo "→ Issuing SSL certificate..."
+              echo "→ Requesting certificate from Let's Encrypt..."
               docker exec talaseen-certbot certbot certonly \
                 --webroot \
                 --webroot-path /var/www/certbot \
@@ -119,9 +122,12 @@ jobs:
                 -d atashtravel.com \
                 -d www.atashtravel.com
 
-              echo "✓ SSL certificate issued successfully"
-              echo "→ Reloading nginx to activate SSL..."
+              echo "✓ Let's Encrypt certificate obtained"
+              echo "→ Reloading nginx to activate real certificate..."
               docker compose exec -T nginx nginx -s reload
+            else
+              echo "ℹ Using temporary self-signed certificate for HTTP/HTTPS validation"
+              echo "  To obtain a production certificate, re-run with provision_ssl=true"
             fi
             
             echo "✓ Atash Travel deployed successfully"
