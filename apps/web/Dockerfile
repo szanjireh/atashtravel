@@ -75,14 +75,11 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Copy necessary files from build stage
-# Standalone output includes the full workspace structure
+# Because outputFileTracingRoot points at the monorepo root, the standalone
+# output mirrors the workspace path (apps/web/server.js), not a flat /app/server.js.
 COPY --from=build --chown=nextjs:nodejs /app/apps/web/.next/standalone /app
 COPY --from=build --chown=nextjs:nodejs /app/apps/web/.next/static /app/apps/web/.next/static
 COPY --from=build --chown=nextjs:nodejs /app/apps/web/public /app/apps/web/public
-
-# Ensure .next is accessible from root for server.js
-RUN mkdir -p /app/.next && \
-    ln -s /app/apps/web/.next/static /app/.next/static || true
 
 # Expose port
 EXPOSE 3000
@@ -93,4 +90,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=5 \
 
 # Start the application
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "server.js"]
+CMD ["node", "apps/web/server.js"]
