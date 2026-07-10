@@ -144,6 +144,7 @@ services:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
       - ./certbot/init-certs.sh:/init-certs.sh:ro
+      - ./certbot/detect-cert-type.sh:/detect-cert-type.sh:ro
     networks:
       - atashtravel-network
     entrypoint: /bin/sh

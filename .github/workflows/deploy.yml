@@ -96,12 +96,12 @@ jobs:
             echo "→ Waiting for services to become healthy..."
             sleep 5
 
-            # ── SSL provisioning (first-time only) ──────────────────────────
-            # On first deployment, certbot generates a self-signed cert automatically,
-            # allowing nginx to start. This provisioning step replaces it with a real one.
+            # ── SSL provisioning (idempotent, safe for repeated deployments) ───
+            # On first deployment, certbot generated a self-signed cert automatically.
+            # This provisioning step replaces it with a real Let's Encrypt certificate.
+            # Subsequent deployments skip issuance and only renew if needed.
             if [[ "${{ github.event.inputs.provision_ssl }}" == "true" ]]; then
               echo "→ Provisioning Let's Encrypt certificate for atashtravel.com..."
-              echo "  (replacing temporary self-signed cert with production cert)"
 
               # Verify certbot container is running
               if ! docker ps | grep talaseen-certbot >/dev/null; then
@@ -109,6 +109,40 @@ jobs:
                 exit 1
               fi
 
+              echo "→ Checking for existing certificate..."
+              CERT_TYPE=$(docker exec talaseen-certbot /bin/sh /detect-cert-type.sh 2>/dev/null || echo "unknown")
+              
+              case "$CERT_TYPE" in
+                no-cert)
+                  echo "  No certificate found - requesting new certificate from Let's Encrypt..."
+                  ;;
+                self-signed)
+                  echo "  Found temporary self-signed certificate - removing before renewal..."
+                  docker exec talaseen-certbot rm -rf /etc/letsencrypt/live/atashtravel.com
+                  docker exec talaseen-certbot rm -rf /etc/letsencrypt/archive/atashtravel.com
+                  docker exec talaseen-certbot rm -rf /etc/letsencrypt/renewal/atashtravel.com.conf
+                  echo "  Bootstrap certificate removed safely"
+                  ;;
+                letsencrypt)
+                  echo "  Found valid Let's Encrypt certificate - renewing if near expiration..."
+                  docker exec talaseen-certbot certbot renew \
+                    --webroot \
+                    --webroot-path /var/www/certbot \
+                    --non-interactive \
+                    --email ${{ secrets.CERTBOT_EMAIL }} \
+                    2>&1 | grep -v "^  Cert not yet due for renewal" || true
+                  echo "✓ Certificate renewed or verified (idempotent)"
+                  echo "→ Reloading nginx..."
+                  docker compose exec -T nginx nginx -s reload || true
+                  exit 0
+                  ;;
+                *)
+                  echo "  Found certificate of unknown type - skipping to avoid disruption"
+                  exit 0
+                  ;;
+              esac
+
+              # Request certificate if we're still here (no-cert or after removing self-signed)
               echo "→ Creating certbot challenge directories..."
               docker exec talaseen-certbot mkdir -p /var/www/certbot
 
@@ -126,8 +160,8 @@ jobs:
               echo "→ Reloading nginx to activate real certificate..."
               docker compose exec -T nginx nginx -s reload
             else
-              echo "ℹ Using temporary self-signed certificate for HTTP/HTTPS validation"
-              echo "  To obtain a production certificate, re-run with provision_ssl=true"
+              echo "ℹ Using existing certificate for deployment"
+              echo "  To provision/renew a certificate, re-run with provision_ssl=true"
             fi
             
             echo "✓ Atash Travel deployed successfully"

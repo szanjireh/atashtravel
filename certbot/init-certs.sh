@@ -8,9 +8,10 @@
 set -e
 
 CERTDIR="/etc/letsencrypt/live/atashtravel.com"
+FULLCHAIN="$CERTDIR/fullchain.pem"
 
 # Generate self-signed certificate if it doesn't exist
-if [ ! -f "$CERTDIR/fullchain.pem" ]; then
+if [ ! -f "$FULLCHAIN" ]; then
     echo "→ First boot detected: Generating self-signed certificate..."
     mkdir -p "$CERTDIR"
     
@@ -25,8 +26,12 @@ if [ ! -f "$CERTDIR/fullchain.pem" ]; then
         -addext "subjectAltName=DNS:atashtravel.com,DNS:www.atashtravel.com" \
         2>/dev/null
     
-    echo "✓ Self-signed certificate generated at $CERTDIR"
-    echo "  This will be replaced by a real certificate when provision_ssl=true"
+    echo "✓ Self-signed certificate generated"
+    echo "  This is a temporary bootstrap certificate for initial deployment."
+    echo "  It will be replaced with a real certificate when provision_ssl=true"
+else
+    echo "→ Certificate already exists - skipping bootstrap generation"
+    echo "  (type: $(sh /detect-cert-type.sh 2>/dev/null || echo 'unknown'))"
 fi
 
 # Keep container alive (POSIX sh compatible, no Bash constructs)
