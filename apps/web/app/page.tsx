@@ -1,263 +1,247 @@
 'use client';
 
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, MapPin, Users, Clock, Award, ShieldCheck, Zap } from 'lucide-react';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white border-b border-neutral-200">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-              <span className="text-white font-bold text-lg">آ</span>
-            </div>
-            <span className="font-bold text-xl text-primary hidden sm:inline">آتاش تراول</span>
+    <main dir="rtl">
+      {/* HEADER */}
+      <header className="site-header" id="site-header">
+        <div className="container header-inner">
+          <Link href="/" className="brand">
+            <img src="/images/logo2.png" alt="آتاش تراول" className="brand-logo" />
+            <span className="brand-name">آتاش تراول</span>
           </Link>
-          
-          <div className="flex items-center gap-2 sm:gap-8">
-            <Link href="#destinations" className="text-sm sm:text-base text-neutral-600 hover:text-primary transition-colors">
-              مقصدها
-            </Link>
-            <Link href="#tours" className="text-sm sm:text-base text-neutral-600 hover:text-primary transition-colors">
-              تورها
-            </Link>
-            <Link href="/login">
-              <Button size="sm" className="bg-primary hover:bg-primary/90">
-                ورود
-              </Button>
-            </Link>
-          </div>
+          <nav className="main-nav" id="main-nav">
+            <a href="#home" className="nav-link">خانه</a>
+            <a href="#tours" className="nav-link">تورها</a>
+            <a href="#services" className="nav-link">خدمات</a>
+            <a href="/about" className="nav-link">درباره ما</a>
+            <a href="#contact" className="nav-link">تماس</a>
+            <a href="#contact" className="btn btn-nav">رزرو تور</a>
+          </nav>
+          <button className="hamburger" id="hamburger" aria-label="باز کردن منو">
+            <span></span><span></span><span></span>
+          </button>
         </div>
-      </nav>
+      </header>
 
-      {/* Hero Section */}
-      <section className="relative h-[600px] sm:h-[700px] overflow-hidden bg-gradient-to-br from-primary via-primary to-secondary">
-        {/* Decorative elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-0 -right-1/4 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 -left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
-        </div>
-
-        {/* Content */}
-        <div className="relative h-full flex flex-col items-center justify-center px-4 text-center text-white space-y-6">
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight">
-            تجربه سفری بی‌نظیر
-          </h1>
-          <p className="text-lg sm:text-xl max-w-2xl text-white/90">
-            آتاش تراول شما را به بهترین مقصدهای جهان می‌برد. تورهای منحصربفرد، هتل‌های لوکس و خدمات شامل
+      {/* HERO */}
+      <section className="hero" id="home">
+        <div className="hero-overlay"></div>
+        <div className="hero-content container">
+          <span className="hero-badge">✈ تجربه سفر متفاوت</span>
+          <h1 className="hero-title">سفر به <em>رویاهایت</em><br/>را از اینجا شروع کن</h1>
+          <p className="hero-subtitle">
+            آتاش تراول با بیش از یک دهه تجربه، بهترین تورهای خارجی را<br/>
+            با قیمت مناسب و خدمات ویژه ارائه می‌دهد
           </p>
-          
-          {/* Search/CTA */}
-          <div className="pt-8 flex flex-col sm:flex-row gap-4 justify-center w-full max-w-md">
-            <Link href="/tours" className="flex-1">
-              <Button size="lg" variant="secondary" className="w-full text-base font-semibold">
-                کاوش تورها
-                <ArrowLeft className="w-5 h-5 mr-2" />
-              </Button>
-            </Link>
-            <Link href="/register" className="flex-1">
-              <Button size="lg" variant="outline" className="w-full text-base font-semibold bg-white/10 border-white/30 text-white hover:bg-white/20">
-                شروع سفر
-              </Button>
-            </Link>
+          <div className="hero-actions">
+            <a href="#tours" className="btn btn-primary">مشاهده تورها</a>
+            <a href="#contact" className="btn btn-ghost">مشاوره رایگان</a>
+          </div>
+          <div className="hero-stats">
+            <div className="hero-stat"><strong>+۵۰۰۰</strong><span>مسافر راضی</span></div>
+            <div className="hero-stat-sep"></div>
+            <div className="hero-stat"><strong>+۱۰</strong><span>سال تجربه</span></div>
+            <div className="hero-stat-sep"></div>
+            <div className="hero-stat"><strong>+۳۰</strong><span>مقصد فعال</span></div>
           </div>
         </div>
+        <div className="scroll-hint"><span></span></div>
       </section>
 
-      {/* Trust Section */}
-      <section className="bg-neutral-50 py-12 sm:py-16 lg:py-20">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8">
-            {[
-              { icon: Users, label: '۲۵۰+', text: 'مسافر راضی' },
-              { icon: MapPin, label: '۸۰+', text: 'مقصد جهانی' },
-              { icon: Award, label: '۱۵+', text: 'سال تجربه' },
-              { icon: ShieldCheck, label: '۱۰۰%', text: 'ضمان اطمینان' },
-            ].map((item, i) => {
-              const Icon = item.icon;
-              return (
-                <div key={i} className="text-center space-y-3">
-                  <div className="flex justify-center">
-                    <Icon className="w-8 h-8 sm:w-10 sm:h-10 text-secondary" />
-                  </div>
-                  <div className="text-xl sm:text-2xl font-bold text-primary">{item.label}</div>
-                  <div className="text-xs sm:text-sm text-neutral-600">{item.text}</div>
-                </div>
-              );
-            })}
+      {/* TOURS */}
+      <section className="section" id="tours">
+        <div className="container">
+          <div className="section-head">
+            <span className="section-tag">تورهای ویژه</span>
+            <h2 className="section-title">محبوب‌ترین مقصدها</h2>
+            <p className="section-sub">از بین بهترین تورها انتخاب کنید و سفر رویایی‌تان را آغاز نمایید</p>
           </div>
-        </div>
-      </section>
-
-      {/* Featured Destinations */}
-      <section id="destinations" className="py-16 sm:py-20 lg:py-24">
-        <div className="container mx-auto px-4">
-          <div className="mb-12 space-y-4">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary">
-              مقصدهای شاخص
-            </h2>
-            <p className="text-lg text-neutral-600 max-w-2xl">
-              بهترین و محبوب‌ترین مقصدهای گردشگری را کشف کنید
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {[
-              {
-                name: 'استانبول',
-                image: '🌉',
-                description: 'شهر دو قاره با تاریخ ۲۰۰۰ ساله',
-                tours: '۲۸ تور',
-              },
-              {
-                name: 'دبی',
-                image: '🏙️',
-                description: 'خرید، تجملات و ساحل‌های زیبا',
-                tours: '۳۵ تور',
-              },
-              {
-                name: 'پاریس',
-                image: '🗼',
-                description: 'شهر عشق و هنر و فرهنگ',
-                tours: '۲۲ تور',
-              },
-              {
-                name: 'کیش',
-                image: '🏝️',
-                description: 'جزیره زیبا با آب‌های فیروزه‌ای',
-                tours: '۱۸ تور',
-              },
-              {
-                name: 'رم',
-                image: '🏛️',
-                description: 'میراث باستانی و معماری رومی',
-                tours: '۲۵ تور',
-              },
-              {
-                name: 'بنکوک',
-                image: '🏮',
-                description: 'معابد باشکوه و بازارهای سنتی',
-                tours: '۲۱ تور',
-              },
-            ].map((dest, i) => (
-              <div key={i} className="group cursor-pointer card-hover rounded-2xl overflow-hidden bg-white border border-neutral-200">
-                <div className="h-48 bg-gradient-to-br from-secondary/20 to-primary/20 flex items-center justify-center text-6xl">
-                  {dest.image}
+          <div className="tours-grid">
+            <a href="tours/van.html" className="tour-card">
+              <div className="tour-img-wrap">
+                <img src="/images/van.jpg" alt="تور وان" loading="lazy" />
+                <span className="tour-badge">داغ 🔥</span>
+              </div>
+              <div className="tour-body">
+                <div className="tour-meta">
+                  <span>🇹🇷 ترکیه</span>
+                  <span>۳ شب | ۴ روز</span>
                 </div>
-                <div className="p-6 space-y-3">
-                  <h3 className="text-xl font-bold text-primary">{dest.name}</h3>
-                  <p className="text-sm text-neutral-600 leading-relaxed">{dest.description}</p>
-                  <div className="flex items-center justify-between pt-4 border-t border-neutral-200">
-                    <span className="text-sm font-semibold text-secondary">{dest.tours}</span>
-                    <ArrowLeft className="w-5 h-5 text-primary group-hover:translate-x-1 transition-transform" />
-                  </div>
+                <h3>تور وان</h3>
+                <p>خرید، تفریح و طبیعت بکر در نزدیکی مرز ایران و ترکیه</p>
+                <div className="tour-footer">
+                  <span className="tour-price">از <strong>۴۵۰$</strong></span>
+                  <span className="tour-arrow">جزئیات ←</span>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Why Choose Us */}
-      <section className="py-16 sm:py-20 lg:py-24 bg-neutral-50">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary mb-12 text-center">
-            چرا آتاش تراول؟
-          </h2>
-          
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {[
-              {
-                icon: Award,
-                title: 'بهترین قیمت‌ها',
-                description: 'ما مستقیم با هتل‌ها و تورآپریتورها کار می‌کنیم تا بهترین قیمت را ارائه دهیم',
-              },
-              {
-                icon: ShieldCheck,
-                title: 'پشتیبانی ۲۴/۷',
-                description: 'تیم متخصصین ما همیشه آماده است تا به شما کمک کند',
-              },
-              {
-                icon: Zap,
-                title: 'رزرو آسان',
-                description: 'فرایند رزرو ساده و سریع در چند کلیک',
-              },
-            ].map((item, i) => {
-              const Icon = item.icon;
-              return (
-                <div key={i} className="p-8 bg-white rounded-2xl border border-neutral-200">
-                  <Icon className="w-12 h-12 text-secondary mb-4" />
-                  <h3 className="text-xl font-bold text-primary mb-3">{item.title}</h3>
-                  <p className="text-neutral-600 leading-relaxed">{item.description}</p>
+            </a>
+            <a href="tours/antalya.html" className="tour-card">
+              <div className="tour-img-wrap">
+                <img src="/images/antalya.jpg" alt="تور آنتالیا" loading="lazy" />
+                <span className="tour-badge tour-badge--gold">پرواز + هتل ✈</span>
+              </div>
+              <div className="tour-body">
+                <div className="tour-meta">
+                  <span>🇹🇷 ترکیه</span>
+                  <span>۶ شب | ۷ روز</span>
                 </div>
-              );
-            })}
+                <h3>تور آنتالیا</h3>
+                <p>ساحل آبی مدیترانه، هتل‌های لوکس و تفریحات دریایی</p>
+                <div className="tour-footer">
+                  <span className="tour-price">از <strong>۷۵۰$</strong></span>
+                  <span className="tour-arrow">جزئیات ←</span>
+                </div>
+              </div>
+            </a>
+            <a href="tours/armenia-water.html" className="tour-card">
+              <div className="tour-img-wrap">
+                <img src="/images/armenia-water.jpg" alt="جشن آب ارمنستان" loading="lazy" />
+                <span className="tour-badge tour-badge--blue">رویداد ویژه 🎉</span>
+              </div>
+              <div className="tour-body">
+                <div className="tour-meta">
+                  <span>🇦🇲 ارمنستان</span>
+                  <span>۴ شب | ۵ روز</span>
+                </div>
+                <h3>جشن آب ارمنستان</h3>
+                <p>تجربه جشنواره وارداوار؛ شادترین رویداد تابستانی قفقاز</p>
+                <div className="tour-footer">
+                  <span className="tour-price">از <strong>۵۵۰$</strong></span>
+                  <span className="tour-arrow">جزئیات ←</span>
+                </div>
+              </div>
+            </a>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-r from-primary to-secondary">
-        <div className="container mx-auto px-4 text-center text-white space-y-6">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold">
-            آماده برای سفر بعدی خود هستید؟
-          </h2>
-          <p className="text-lg text-white/90 max-w-2xl mx-auto">
-            امروز با آتاش تراول ثبت‌نام کنید و ۲۰% تخفیف برای سفر اول خود دریافت کنید
-          </p>
-          <div className="pt-6 flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/register">
-              <Button size="lg" variant="secondary" className="text-base font-semibold">
-                ثبت‌نام رایگان
-              </Button>
-            </Link>
-            <Link href="#">
-              <Button size="lg" variant="outline" className="text-base font-semibold bg-white/10 border-white/30 text-white hover:bg-white/20">
-                تماس با ما
-              </Button>
-            </Link>
+      {/* WHY US */}
+      <section className="section why-section">
+        <div className="container">
+          <div className="section-head">
+            <span className="section-tag">چرا آتاش تراول؟</span>
+            <h2 className="section-title">سفر با اطمینان کامل</h2>
+          </div>
+          <div className="why-grid">
+            <div className="why-card">
+              <div className="why-icon">🏆</div>
+              <h3>مجوز رسمی</h3>
+              <p>دارای مجوز رسمی گردشگری و عضو انجمن آژانس‌های مسافرتی ایران</p>
+            </div>
+            <div className="why-card">
+              <div className="why-icon">💰</div>
+              <h3>بهترین قیمت</h3>
+              <p>ضمانت بهترین نرخ با شفافیت کامل در اعلام هزینه‌ها و بدون هزینه پنهان</p>
+            </div>
+            <div className="why-card">
+              <div className="why-icon">🛡️</div>
+              <h3>پشتیبانی ۲۴/۷</h3>
+              <p>تیم پشتیبانی ما در تمام لحظات سفر کنار شماست و آماده پاسخگویی است</p>
+            </div>
+            <div className="why-card">
+              <div className="why-icon">📋</div>
+              <h3>ویزا و مدارک</h3>
+              <p>راهنمایی کامل برای اخذ ویزا، آماده‌سازی مدارک و انجام تشریفات گمرکی</p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-neutral-900 text-white py-12 sm:py-16">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div className="space-y-4">
-              <h3 className="font-bold text-lg">آتاش تراول</h3>
-              <p className="text-neutral-400 text-sm">پلتفرم سفر و گردشگری شما</p>
-            </div>
-            <div className="space-y-3">
-              <h4 className="font-semibold">خدمات</h4>
-              <ul className="text-sm text-neutral-400 space-y-2">
-                <li><Link href="/tours" className="hover:text-white transition-colors">تورها</Link></li>
-                <li><Link href="/hotels" className="hover:text-white transition-colors">هتل‌ها</Link></li>
-              </ul>
-            </div>
-            <div className="space-y-3">
-              <h4 className="font-semibold">درباره ما</h4>
-              <ul className="text-sm text-neutral-400 space-y-2">
-                <li><a href="#" className="hover:text-white transition-colors">درباره آتاش تراول</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">شرایط استفاده</a></li>
-              </ul>
-            </div>
-            <div className="space-y-3">
-              <h4 className="font-semibold">تماس</h4>
-              <ul className="text-sm text-neutral-400 space-y-2">
-                <li>تلفن: ۱۲۳۴-۵۶۷</li>
-                <li><a href="#" className="hover:text-white transition-colors">ایمیل</a></li>
-              </ul>
+      {/* SERVICES */}
+      <section className="section services-section" id="services">
+        <div className="container services-inner">
+          <div className="services-text">
+            <span className="section-tag">خدمات ما</span>
+            <h2 className="section-title">همه چیز برای سفر شما</h2>
+            <p className="section-sub">از لحظه تصمیم‌گیری تا بازگشت، مدیریت سفر شما با ماست</p>
+            <ul className="services-list">
+              <li><span className="check">✓</span> رزرو بلیط هواپیما داخلی و خارجی</li>
+              <li><span className="check">✓</span> رزرو هتل با بهترین قیمت تضمینی</li>
+              <li><span className="check">✓</span> تور گروهی و اختصاصی (VIP)</li>
+              <li><span className="check">✓</span> اخذ ویزا و راهنمایی مدارک</li>
+              <li><span className="check">✓</span> ترنسفر فرودگاهی</li>
+              <li><span className="check">✓</span> بیمه مسافرتی جامع</li>
+            </ul>
+            <a href="#contact" className="btn btn-primary">درخواست مشاوره رایگان</a>
+          </div>
+          <div className="services-visual">
+            <img src="/images/antalya.jpg" alt="خدمات آتاش تراول" loading="lazy" />
+          </div>
+        </div>
+      </section>
+
+      {/* CONTACT */}
+      <section className="section contact-section" id="contact">
+        <div className="container">
+          <div className="section-head">
+            <span className="section-tag">تماس با ما</span>
+            <h2 className="section-title">آماده‌ایم تا کمک کنیم</h2>
+            <p className="section-sub">همین الان با ما در ارتباط باشید و مشاوره رایگان دریافت کنید</p>
+          </div>
+          <div className="contact-grid">
+            <a href="https://wa.me/989128637309" target="_blank" rel="noopener noreferrer" className="contact-card">
+              <div className="contact-icon contact-icon--green">💬</div>
+              <h3>واتساپ</h3>
+              <p dir="ltr">+98 912 863 7309</p>
+              <span className="contact-cta">ارسال پیام ←</span>
+            </a>
+            <a href="https://t.me/atashtravel" target="_blank" rel="noopener noreferrer" className="contact-card">
+              <div className="contact-icon contact-icon--blue">✈</div>
+              <h3>تلگرام</h3>
+              <p>@atashtravel</p>
+              <span className="contact-cta">پیام در تلگرام ←</span>
+            </a>
+            <a href="https://instagram.com/atashtravel" target="_blank" rel="noopener noreferrer" className="contact-card">
+              <div className="contact-icon contact-icon--pink">📷</div>
+              <h3>اینستاگرام</h3>
+              <p>@atashtravel</p>
+              <span className="contact-cta">دنبال کنید ←</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="site-footer">
+        <div className="container footer-grid">
+          <div className="footer-brand">
+            <img src="/images/logo2.png" alt="آتاش تراول" />
+            <h2>آتاش تراول</h2>
+            <p>سفر با اطمینان، لحظات ماندگار</p>
+          </div>
+          <div className="footer-col">
+            <h4>لینک‌های سریع</h4>
+            <nav>
+              <a href="#tours">تورها</a>
+              <a href="#services">خدمات</a>
+              <a href="/about">درباره ما</a>
+              <a href="#contact">تماس</a>
+            </nav>
+          </div>
+          <div className="footer-col">
+            <h4>تورهای ویژه</h4>
+            <nav>
+              <a href="tours/van.html">تور وان</a>
+              <a href="tours/antalya.html">تور آنتالیا</a>
+              <a href="tours/armenia-water.html">جشن آب ارمنستان</a>
+            </nav>
+          </div>
+          <div className="footer-col">
+            <h4>شبکه‌های اجتماعی</h4>
+            <div className="footer-socials">
+              <a href="https://instagram.com/atashtravel" target="_blank" rel="noopener noreferrer">اینستاگرام</a>
+              <a href="https://t.me/atashtravel" target="_blank" rel="noopener noreferrer">تلگرام</a>
+              <a href="https://wa.me/989128637309" target="_blank" rel="noopener noreferrer">واتساپ</a>
             </div>
           </div>
-          <div className="border-t border-neutral-800 pt-8 text-center text-sm text-neutral-400">
-            <p>© ۱۴۰۲ آتاش تراول. تمام حقوق محفوظ است.</p>
-          </div>
+        </div>
+        <div className="footer-bottom">
+          <p>© ۱۴۰۴ آتاش تراول – تمامی حقوق محفوظ است</p>
         </div>
       </footer>
-    </div>
+    </main>
   );
 }
