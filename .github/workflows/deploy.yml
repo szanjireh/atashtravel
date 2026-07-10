@@ -33,24 +33,7 @@ jobs:
         continue-on-error: true
 
   # ─────────────────────────────────────────────
-  # 2. Prepare Deploy
-  # ─────────────────────────────────────────────
-  # build:
-  #   name: Prepare Deploy
-  #   runs-on: ubuntu-latest
-  #   needs: validate
-  #   permissions:
-  #     contents: read
-
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
-
-  #     - name: Validate Docker Compose
-  #       run: docker compose config
-
-  # ─────────────────────────────────────────────
-  # 3. Deploy to server
+  # 2. Deploy to server
   # ─────────────────────────────────────────────
   deploy:
     name: Deploy to Production
@@ -85,15 +68,28 @@ jobs:
             export GIT_SSH_COMMAND="ssh -i ~/.ssh/githubsajad -o StrictHostKeyChecking=accept-new"
             git fetch origin main
             git reset --hard origin/main
-            # git clean -fd
-            git clean -fdx -e certbot/conf
+            # -e excludes paths from deletion during clean.
+            # .env (and any nested env files) MUST be excluded or every
+            # deploy wipes out the server's real secrets.
+            git clean -fdx \
+              -e certbot/conf \
+              -e .env \
+              -e .env.production \
+              -e apps/web/.env \
+              -e apps/web/.env.production
 
+            echo "→ Verifying .env exists before proceeding..."
+            if [ ! -f .env ]; then
+              echo "✗ Error: .env not found at $(pwd)/.env — deploy aborted."
+              echo "  Create it manually on the server before deploying."
+              exit 1
+            fi
 
             echo "→ Tearing down any existing stack to free ports..."
             docker compose down --remove-orphans || true
 
-            echo "→ Ensuring talaseen-network exists..."
-            docker network inspect talaseen-network >/dev/null 2>&1 || docker network create talaseen-network
+            echo "→ Ensuring atashtravel-network exists..."
+            docker network inspect atashtravel-network >/dev/null 2>&1 || docker network create atashtravel-network
 
             echo "→ Starting / updating containers..."
             docker compose up -d --remove-orphans
@@ -109,28 +105,28 @@ jobs:
               echo "→ Provisioning Let's Encrypt certificate for atashtravel.com..."
 
               # Verify certbot container is running
-              if ! docker ps | grep talaseen-certbot >/dev/null; then
-                echo "✗ Error: certbot container (talaseen-certbot) is not running"
+              if ! docker ps | grep atashtravel-certbot >/dev/null; then
+                echo "✗ Error: certbot container (atashtravel-certbot) is not running"
                 exit 1
               fi
 
               echo "→ Checking for existing certificate..."
-              CERT_TYPE=$(docker exec talaseen-certbot /bin/sh /detect-cert-type.sh 2>/dev/null || echo "unknown")
-              
+              CERT_TYPE=$(docker exec atashtravel-certbot /bin/sh /detect-cert-type.sh 2>/dev/null || echo "unknown")
+
               case "$CERT_TYPE" in
                 no-cert)
                   echo "  No certificate found - requesting new certificate from Let's Encrypt..."
                   ;;
                 self-signed)
                   echo "  Found temporary self-signed certificate - removing before renewal..."
-                  docker exec talaseen-certbot rm -rf /etc/letsencrypt/live/atashtravel.com
-                  docker exec talaseen-certbot rm -rf /etc/letsencrypt/archive/atashtravel.com
-                  docker exec talaseen-certbot rm -rf /etc/letsencrypt/renewal/atashtravel.com.conf
+                  docker exec atashtravel-certbot rm -rf /etc/letsencrypt/live/atashtravel.com
+                  docker exec atashtravel-certbot rm -rf /etc/letsencrypt/archive/atashtravel.com
+                  docker exec atashtravel-certbot rm -rf /etc/letsencrypt/renewal/atashtravel.com.conf
                   echo "  Bootstrap certificate removed safely"
                   ;;
                 letsencrypt)
                   echo "  Found valid Let's Encrypt certificate - renewing if near expiration..."
-                  docker exec talaseen-certbot certbot renew \
+                  docker exec atashtravel-certbot certbot renew \
                     --webroot \
                     --webroot-path /var/www/certbot \
                     --non-interactive \
@@ -149,10 +145,10 @@ jobs:
 
               # Request certificate if we're still here (no-cert or after removing self-signed)
               echo "→ Creating certbot challenge directories..."
-              docker exec talaseen-certbot mkdir -p /var/www/certbot
+              docker exec atashtravel-certbot mkdir -p /var/www/certbot
 
               echo "→ Requesting certificate from Let's Encrypt..."
-              docker exec talaseen-certbot certbot certonly \
+              docker exec atashtravel-certbot certbot certonly \
                 --webroot \
                 --webroot-path /var/www/certbot \
                 --non-interactive \
@@ -168,7 +164,7 @@ jobs:
               echo "ℹ Using existing certificate for deployment"
               echo "  To provision/renew a certificate, re-run with provision_ssl=true"
             fi
-            
+
             echo "✓ Atash Travel deployed successfully"
           ENDSSH
 
