@@ -119,6 +119,8 @@ services:
     container_name: atashtravel-web
     restart: unless-stopped
     command: ["node", "apps/web/server.js"]
+    healthcheck:
+      disable: true
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000/api/v1}
