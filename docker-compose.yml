@@ -178,8 +178,8 @@ services:
         condition: service_started  # 👈 CHANGED THIS LINE HERE
       api:
         condition: service_healthy
-      certbot:
-        condition: service_completed_successfully
+      # certbot:
+      #   condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
       interval: 30s
