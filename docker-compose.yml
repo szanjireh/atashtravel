@@ -11,6 +11,8 @@ services:
     image: postgres:16-alpine
     container_name: atashtravel-postgres
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-atashtravel}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-atashtravel_password}
