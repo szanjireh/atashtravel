@@ -84,24 +84,32 @@ jobs:
             cd ${{ secrets.ATASHTRAVEL_PATH }}
             GIT_SSH_COMMAND="ssh -i ~/.ssh/githubsajad -o StrictHostKeyChecking=accept-new" git pull origin main
 
-            echo "→ Rebuilding Docker Compose services..."
-            docker compose build
-
             echo "→ Tearing down any existing stack to free ports..."
             docker compose down --remove-orphans || true
 
             echo "→ Ensuring talaseen-network exists..."
             docker network inspect talaseen-network >/dev/null 2>&1 || docker network create talaseen-network
 
-            echo "→ Starting / updating container..."
+            echo "→ Starting / updating containers..."
             docker compose up -d --remove-orphans
+
+            echo "→ Waiting for services to become healthy..."
+            sleep 5
 
             # ── SSL provisioning (first-time only) ──────────────────────────
             if [[ "${{ github.event.inputs.provision_ssl }}" == "true" ]]; then
-              echo "→ Issuing SSL certificate for atashtravel.com..."
+              echo "→ Provisioning SSL certificate for atashtravel.com..."
 
+              # Verify certbot container is running
+              if ! docker ps | grep talaseen-certbot >/dev/null; then
+                echo "✗ Error: certbot container (talaseen-certbot) is not running"
+                exit 1
+              fi
+
+              echo "→ Creating certbot directories..."
               docker exec talaseen-certbot mkdir -p /var/www/certbot
 
+              echo "→ Issuing SSL certificate..."
               docker exec talaseen-certbot certbot certonly \
                 --webroot \
                 --webroot-path /var/www/certbot \
@@ -111,7 +119,9 @@ jobs:
                 -d atashtravel.com \
                 -d www.atashtravel.com
 
-              echo "✓ SSL certificate issued"
+              echo "✓ SSL certificate issued successfully"
+              echo "→ Reloading nginx to activate SSL..."
+              docker compose exec -T nginx nginx -s reload
             fi
             
             echo "✓ Atash Travel deployed successfully"
