@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Menu } from 'lucide-react';
-import SearchBox from './search-box';
+import { Menu, Search } from 'lucide-react';
 
 const NAV_LINKS = [
   { label: 'خانه', href: '#home' },
@@ -46,9 +45,15 @@ export default function Header() {
         </nav>
 
         {/* Right Side Actions */}
-        <div className="flex items-center gap-3">
-          {/* Search Box */}
-          <SearchBox />
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Search Button */}
+          <Link
+            href="/search"
+            className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-slate-900/60 text-slate-200 transition-all hover:bg-slate-800 hover:border-cyan-500/30 hover:text-cyan-400"
+            aria-label="جستجو"
+          >
+            <Search className="h-5 w-5" />
+          </Link>
 
           {/* Sign Up Button - Desktop */}
           <Link
