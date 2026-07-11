@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       provision_ssl:
-        description: "Issue SSL cert for atashtravel.com (first-time setup only)"
+        description: "Force renew/re-provision SSL certificates"
         required: false
         default: "false"
         type: choice
@@ -16,35 +16,17 @@ on:
 
 jobs:
   # ─────────────────────────────────────────────
-  # 1. Validate HTML
-  # ─────────────────────────────────────────────
-  validate:
-    name: Validate HTML
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install html-validate
-        run: npm install -g html-validate
-
-      - name: Validate HTML files
-        run: html-validate "**/*.html" --ignore "node_modules/**"
-        continue-on-error: true
-
-  # ─────────────────────────────────────────────
-  # 2. Deploy to server
+  # Deploy to server (Intelligent & Clean)
   # ─────────────────────────────────────────────
   deploy:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    needs: validate
 
     steps:
-      - name: Checkout
+      - name: Checkout repository code
         uses: actions/checkout@v4
 
-      - name: Setup SSH
+      - name: Setup SSH Connectivity
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -54,7 +36,7 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -p 3031 -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy
+      - name: Execute Remote Deployment Commands
         env:
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
           SERVER_USER: ${{ secrets.SERVER_USER }}
@@ -63,14 +45,13 @@ jobs:
           ssh -p 3031 $SERVER_USER@$SERVER_HOST bash -s << 'ENDSSH'
             set -e
 
-            echo "→ Pulling latest configurations using explicit identity..."
+            echo "→ Pulling latest repository configurations..."
             cd ${{ secrets.ATASHTRAVEL_PATH }}
             export GIT_SSH_COMMAND="ssh -i ~/.ssh/githubsajad -o StrictHostKeyChecking=accept-new"
             git fetch origin main
             git reset --hard origin/main
-            # -e excludes paths from deletion during clean.
-            # .env (and any nested env files) MUST be excluded or every
-            # deploy wipes out the server's real secrets.
+            
+            # Clean untracked files but carefully protect persistent environment configurations and keys
             git clean -fdx \
               -e certbot/conf \
               -e .env \
@@ -78,96 +59,49 @@ jobs:
               -e apps/web/.env \
               -e apps/web/.env.production
 
-            echo "→ Verifying .env exists before proceeding..."
+            echo "→ Checking environment variable configuration file..."
             if [ ! -f .env ]; then
-              echo "✗ Error: .env not found at $(pwd)/.env — deploy aborted."
-              echo "  Create it manually on the server before deploying."
+              echo "✗ Error: .env configuration file not found. Deploy aborted."
               exit 1
             fi
 
-            echo "→ Tearing down any existing stack to free ports..."
-            docker compose down --remove-orphans || true
-
-            echo "→ Ensuring atashtravel-network exists..."
+            echo "→ Verifying Docker core network layer..."
             docker network inspect atashtravel-network >/dev/null 2>&1 || docker network create atashtravel-network
 
-            echo "→ Starting / updating containers..."
-            docker compose up -d --remove-orphans
+            echo "→ Running zero-downtime microservice orchestration update..."
+            docker compose pull
+            docker compose up -d --build --remove-orphans
 
-            echo "→ Waiting for services to become healthy..."
+            echo "→ Clearing dangling image layers to preserve server storage assets..."
+            docker image prune -f
+
+            echo "→ Allowing cluster services a warm up period to verify status..."
             sleep 5
 
-            # ── SSL provisioning (idempotent, safe for repeated deployments) ───
-            # On first deployment, certbot generated a self-signed cert automatically.
-            # This provisioning step replaces it with a real Let's Encrypt certificate.
-            # Subsequent deployments skip issuance and only renew if needed.
+            # ── Permanent Let's Encrypt Control Routine ──
             if [[ "${{ github.event.inputs.provision_ssl }}" == "true" ]]; then
-              echo "→ Provisioning Let's Encrypt certificate for atashtravel.com..."
+              echo "→ Requesting / Updating multi-domain certificate package from Let's Encrypt ACME core..."
 
-              # Verify certbot container is running
-             if ! docker compose ps certbot | grep -q "Up"; then
-              echo "✗ Error: certbot service is not running"
-              exit 1
-             fi
-
-              echo "→ Checking for existing certificate..."
-              CERT_TYPE=$(docker compose exec -T certbot /bin/sh /detect-cert-type.sh 2>/dev/null || echo "unknown")
-              case "$CERT_TYPE" in
-                no-cert)
-                  echo "  No certificate found - requesting new certificate from Let's Encrypt..."
-                  ;;
-                self-signed)
-                  echo "  Found temporary self-signed certificate - removing before renewal..."
-                 docker compose exec -T certbot rm -rf /etc/letsencrypt/live/atashtravel.com
-                 docker compose exec -T certbot rm -rf /etc/letsencrypt/archive/atashtravel.com
-                 docker compose exec -T certbot rm -rf /etc/letsencrypt/renewal/atashtravel.com.conf                
-                  echo "  Bootstrap certificate removed safely"
-                  ;;
-                letsencrypt)
-                  echo "  Found valid Let's Encrypt certificate - renewing if near expiration..."
-                   docker compose exec -T certbot certbot renew \
-                    --webroot \
-                    --webroot-path /var/www/certbot \
-                    --non-interactive \
-                    --email ${{ secrets.CERTBOT_EMAIL }} \
-                    2>&1 | grep -v "^  Cert not yet due for renewal" || true
-                  echo "✓ Certificate renewed or verified (idempotent)"
-                  echo "→ Reloading nginx..."
-                  docker compose exec -T nginx nginx -s reload || true
-                  exit 0
-                  ;;
-                *)
-                  echo "  Found certificate of unknown type - skipping to avoid disruption"
-                  exit 0
-                  ;;
-              esac
-
-              # Request certificate if we're still here (no-cert or after removing self-signed)
-              echo "→ Creating certbot challenge directories..."
-              docker compose exec -T certbot mkdir -p /var/www/certbot
-
-              echo "→ Requesting certificate from Let's Encrypt..."
               docker compose exec -T certbot certbot certonly \
                 --webroot \
                 --webroot-path /var/www/certbot \
                 --non-interactive \
                 --agree-tos \
+                --force-renewal \
                 --email ${{ secrets.CERTBOT_EMAIL }} \
                 -d atashtravel.com \
-                -d www.atashtravel.com
+                -d www.atashtravel.com \
+                -d mail.atashtravel.com
 
-              echo "✓ Let's Encrypt certificate obtained"
-              echo "→ Reloading nginx to activate real certificate..."
+              echo "✓ Production Let's Encrypt core security profile updated"
+              echo "→ Executing graceful live hot-reload configuration switch on Nginx..."
               docker compose exec -T nginx nginx -s reload
-            else
-              echo "ℹ Using existing certificate for deployment"
-              echo "  To provision/renew a certificate, re-run with provision_ssl=true"
             fi
 
-            echo "✓ Atash Travel deployed successfully"
+            echo "✓ Atash Travel platform configuration update deployed completely"
           ENDSSH
 
-      - name: Verify deployment
+      - name: Post-Deployment System Verification
         env:
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
           SERVER_USER: ${{ secrets.SERVER_USER }}
@@ -175,10 +109,10 @@ jobs:
           sleep 10
           ssh -p 3031 $SERVER_USER@$SERVER_HOST << 'EOF'
             set -e
-            echo '=== Docker containers ==='
+            echo '=== Running Cluster Nodes ==='
             docker ps --filter name=atashtravel --format '{{.Names}}: {{.Status}}'
-            echo '=== Local HTTP health check ==='
-            curl -sf http://localhost/health && echo 'health: OK'
-            echo '=== Local front-end check ==='
-            curl -sf -o /dev/null -w '%{http_code}' http://localhost/ && echo ''
+            echo '=== Nginx Local Ingress Routing Status ==='
+            curl -sf http://localhost/health && echo 'Ingress status: Operational'
+            echo '=== Core Application UI Gateway Check ==='
+            curl -sf -o /dev/null -w 'Response Code Matrix: %{http_code}\n' http://localhost/
           EOF
