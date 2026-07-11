@@ -105,28 +105,27 @@ jobs:
               echo "→ Provisioning Let's Encrypt certificate for atashtravel.com..."
 
               # Verify certbot container is running
-              if ! docker ps | grep atashtravel-certbot >/dev/null; then
-                echo "✗ Error: certbot container (atashtravel-certbot) is not running"
-                exit 1
-              fi
+             if ! docker compose ps certbot | grep -q "Up"; then
+              echo "✗ Error: certbot service is not running"
+              exit 1
+             fi
 
               echo "→ Checking for existing certificate..."
-              CERT_TYPE=$(docker exec atashtravel-certbot /bin/sh /detect-cert-type.sh 2>/dev/null || echo "unknown")
-
+              CERT_TYPE=$(docker compose exec -T certbot /bin/sh /detect-cert-type.sh 2>/dev/null || echo "unknown")
               case "$CERT_TYPE" in
                 no-cert)
                   echo "  No certificate found - requesting new certificate from Let's Encrypt..."
                   ;;
                 self-signed)
                   echo "  Found temporary self-signed certificate - removing before renewal..."
-                  docker exec atashtravel-certbot rm -rf /etc/letsencrypt/live/atashtravel.com
-                  docker exec atashtravel-certbot rm -rf /etc/letsencrypt/archive/atashtravel.com
-                  docker exec atashtravel-certbot rm -rf /etc/letsencrypt/renewal/atashtravel.com.conf
+                 docker compose exec -T certbot rm -rf /etc/letsencrypt/live/atashtravel.com
+                 docker compose exec -T certbot rm -rf /etc/letsencrypt/archive/atashtravel.com
+                 docker compose exec -T certbot rm -rf /etc/letsencrypt/renewal/atashtravel.com.conf                
                   echo "  Bootstrap certificate removed safely"
                   ;;
                 letsencrypt)
                   echo "  Found valid Let's Encrypt certificate - renewing if near expiration..."
-                  docker exec atashtravel-certbot certbot renew \
+                   docker compose exec -T certbot certbot renew \
                     --webroot \
                     --webroot-path /var/www/certbot \
                     --non-interactive \
@@ -145,10 +144,10 @@ jobs:
 
               # Request certificate if we're still here (no-cert or after removing self-signed)
               echo "→ Creating certbot challenge directories..."
-              docker exec atashtravel-certbot mkdir -p /var/www/certbot
+              docker compose exec -T certbot mkdir -p /var/www/certbot
 
               echo "→ Requesting certificate from Let's Encrypt..."
-              docker exec atashtravel-certbot certbot certonly \
+              docker compose exec -T certbot certbot certonly \
                 --webroot \
                 --webroot-path /var/www/certbot \
                 --non-interactive \
