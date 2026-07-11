@@ -1,20 +1,60 @@
-FROM nginx:1.27-alpine
+# ==================================
+# Stage 1: Dependencies
+# ==================================
+FROM node:20-slim AS dependencies
 
-# Remove default nginx config
-RUN rm /etc/nginx/conf.d/default.conf
+WORKDIR /app
 
-# Copy custom nginx config
-COPY nginx.conf /etc/nginx/conf.d/atashtravel.conf
+COPY package.json package-lock.json ./
+COPY apps/web/package*.json ./apps/web/
 
-# Copy static site files
-COPY . /usr/share/nginx/html/atashtravel/
+RUN npm ci --workspace=apps/web
+RUN npm cache clean --force
 
-# Remove Docker/config files from the served directory
-RUN rm -f /usr/share/nginx/html/atashtravel/Dockerfile \
-          /usr/share/nginx/html/atashtravel/nginx.conf \
-          /usr/share/nginx/html/atashtravel/docker-compose.yml
+# ==================================
+# Stage 2: Build
+# ==================================
+FROM node:20-slim AS build
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+COPY apps/web/package*.json ./apps/web/
+
+RUN npm ci --workspace=apps/web
+
+COPY apps/web ./apps/web/
+
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_APP_URL
+
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
+ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN npm run build --workspace=apps/web
+
+# ==================================
+# Stage 3: Production
+# ==================================
+FROM node:20-slim AS production
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends dumb-init && rm -rf /var/lib/apt/lists/*
+RUN groupadd -g 1001 nodejs && useradd -u 1001 -g nodejs -m -s /bin/bash nextjs
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=80
+
+COPY --from=build --chown=nextjs:nodejs /app/apps/web/.next/standalone /app
+COPY --from=build --chown=nextjs:nodejs /app/apps/web/.next/static /app/apps/web/.next/static
+COPY --from=build --chown=nextjs:nodejs /app/apps/web/public /app/apps/web/public
+
+USER nextjs
 
 EXPOSE 80
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD wget -qO- http://localhost/health || exit 1
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["node", "apps/web/server.js"]
