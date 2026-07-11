@@ -302,8 +302,3 @@ export default function RegisterPage() {
     </div>
   );
 }
-        </form>
-      </Card>
-    </div>
-  );
-}
