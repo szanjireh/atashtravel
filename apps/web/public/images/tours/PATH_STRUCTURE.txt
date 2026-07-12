@@ -1,0 +1,57 @@
+✅ IMAGE PATH STRUCTURE - ATASH TRAVEL
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Physical Location (on disk):
+📁 apps/web/public/images/tours/
+
+Code Reference (in application):
+🔗 /images/tours/
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ CORRECT PATHS IN CODE:
+
+Homepage (Featured Tours):
+  • /images/tours/van-tour.jpg
+  • /images/tours/antalya-tour.jpg  
+  • /images/tours/istanbul-tour.jpg
+
+Tour Detail Pages (Hero Images):
+  • /images/tours/van-hero.jpg
+  • /images/tours/antalya-hero.jpg
+  • /images/tours/istanbul-hero.jpg
+  • /images/tours/trabzon-hero.jpg
+
+OpenGraph Images (Social Sharing):
+  • /images/tours/van-og.jpg
+  • /images/tours/antalya-og.jpg
+  • /images/tours/istanbul-og.jpg
+  • /images/tours/trabzon-og.jpg
+
+Gallery Images:
+  • /images/tours/van-1.jpg → van-6.jpg
+  • /images/tours/antalya-1.jpg → antalya-6.jpg
+  • /images/tours/istanbul-1.jpg → istanbul-6.jpg
+  • /images/tours/trabzon-1.jpg → trabzon-6.jpg
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ INCORRECT PATHS (DO NOT USE):
+
+  ✗ public/images/tours/...
+  ✗ /image/tours/...
+  ✗ images/tours/... (missing leading slash)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 HOW IT WORKS:
+
+Next.js serves everything in the `public` folder from the root URL.
+
+Files in:     apps/web/public/images/tours/van-tour.jpg
+Are served:   /images/tours/van-tour.jpg
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ All code is already configured correctly!
