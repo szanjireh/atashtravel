@@ -10,6 +10,7 @@ export const toursData: Record<string, TourData> = {
     price: '۴۵۰$',
     priceDetail: 'قیمت به ازای هر نفر در اتاق دو تخته',
     
+    image: '/images/tours/van-tour.jpg',
     heroImage: '/images/tours/van-hero.jpg',
     shortDescription: 'سفری به قلب تاریخ و طبیعت شرق ترکیه - خرید ارزان، طبیعت بکر و دریاچه زیبای وان',
     
@@ -216,6 +217,7 @@ export const toursData: Record<string, TourData> = {
     price: '۷۵۰$',
     priceDetail: 'قیمت شامل پرواز + هتل All Inclusive',
     
+    image: '/images/tours/antalya-tour.jpg',
     heroImage: '/images/tours/antalya-hero.jpg',
     shortDescription: 'بهشت ساحلی مدیترانه - هتل‌های لوکس All Inclusive، سواحل آبی و تفریحات بی‌پایان',
     
@@ -489,6 +491,7 @@ export const toursData: Record<string, TourData> = {
     price: '۶۵۰$',
     priceDetail: 'قیمت شامل پرواز + هتل ۴ ستاره',
     
+    image: '/images/tours/istanbul-tour.jpg',
     heroImage: '/images/tours/istanbul-hero.jpg',
     shortDescription: 'شهر دو قاره - تلفیقی از تاریخ، فرهنگ، خرید و تفریح در زیباترین شهر جهان',
     
@@ -752,6 +755,7 @@ export const toursData: Record<string, TourData> = {
     price: '۵۵۰$',
     priceDetail: 'قیمت شامل پرواز + هتل ۴ ستاره',
     
+    image: '/images/tours/trabzon-tour.jpg',
     heroImage: '/images/tours/trabzon-hero.jpg',
     shortDescription: 'مروارید دریای سیاه - طبیعت سرسبز، صومعه تاریخی و دریاچه اوزون گول',
     

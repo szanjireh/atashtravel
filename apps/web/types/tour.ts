@@ -8,8 +8,9 @@ export interface TourData {
   price: string;
   priceDetail?: string;
   
-  // Hero Section
-  heroImage: string;
+  // Images
+  image: string; // Card/listing image
+  heroImage: string; // Hero section background
   shortDescription: string;
   
   // Departure & Logistics

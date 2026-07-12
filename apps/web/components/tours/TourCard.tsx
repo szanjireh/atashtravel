@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { TourData } from '@/types/tour';
 
 interface TourCardProps {
@@ -12,12 +13,14 @@ export default function TourCard({ tour }: TourCardProps) {
       className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.07] to-white/[0.02] backdrop-blur-sm transition-all duration-300 hover:-translate-y-2 hover:border-cyan-500/30 hover:shadow-2xl hover:shadow-cyan-500/10"
     >
       {/* Image */}
-      <div className="relative h-56 sm:h-64 overflow-hidden bg-gradient-to-br from-cyan-500/20 to-sky-500/20">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <svg className="w-16 h-16 text-cyan-400/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-        </div>
+      <div className="relative h-56 sm:h-64 overflow-hidden">
+        <Image
+          src={tour.image}
+          alt={tour.title}
+          fill
+          className="object-cover transition-transform duration-500 group-hover:scale-110"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+        />
         
         {/* Overlay Badge */}
         <div className="absolute top-4 right-4 px-3 py-1.5 rounded-lg bg-slate-950/80 backdrop-blur-sm text-xs font-bold text-cyan-400 border border-cyan-500/30">

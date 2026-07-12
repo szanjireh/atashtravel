@@ -21,7 +21,17 @@ export default function TourHero({
   return (
     <section className="relative h-[500px] md:h-[600px] overflow-hidden">
       {/* Background Image */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#030712]/60 via-[#030712]/40 to-[#030712]">
+      <div className="absolute inset-0">
+        <Image
+          src={heroImage}
+          alt={title}
+          fill
+          className="object-cover"
+          priority
+          sizes="100vw"
+        />
+        {/* Dark Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#030712]/60 via-[#030712]/40 to-[#030712]" />
         <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-transparent opacity-60" />
       </div>
 
