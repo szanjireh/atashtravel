@@ -1,0 +1,11 @@
+export { default as TourHero } from './TourHero';
+export { default as TourSummary } from './TourSummary';
+export { default as TourFeatures } from './TourFeatures';
+export { default as TourItinerary } from './TourItinerary';
+export { default as TourServices } from './TourServices';
+export { default as TourHotels } from './TourHotels';
+export { default as TourFAQ } from './TourFAQ';
+export { default as TourTips } from './TourTips';
+export { default as RelatedTours } from './RelatedTours';
+export { default as BookingCTA } from './BookingCTA';
+export { default as TourPageTemplate } from './TourPageTemplate';
