@@ -6,11 +6,12 @@ import Image from 'next/image';
 import { Menu, Search } from 'lucide-react';
 
 const NAV_LINKS = [
-  { label: 'خانه', href: '#home' },
-  { label: 'تورها', href: '#tours' },
-  { label: 'خدمات', href: '#services' },
+  { label: 'خانه', href: '/' },
+  { label: 'تورها', href: '/tours' },
+  { label: 'هتل‌ها', href: '/hotels' },
+  { label: 'ویزا', href: '/visa' },
   { label: 'درباره ما', href: '/about' },
-  { label: 'تماس با ما', href: '#contact' },
+  { label: 'تماس با ما', href: '/contact' },
 ];
 
 export default function Header() {
