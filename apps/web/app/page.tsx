@@ -12,7 +12,7 @@ const HERO_STATS = [
 
 const FEATURED_TOURS = [
   {
-    slug: 'van',
+    slug: 'van-tour',
     title: 'تور وان',
     description: 'خرید، تفریح و طبیعت بکر در نزدیکی مرز ایران و ترکیه',
     location: 'ترکیه',
@@ -23,7 +23,7 @@ const FEATURED_TOURS = [
     badgeType: 'danger',
   },
   {
-    slug: 'antalya',
+    slug: 'antalya-tour',
     title: 'تور آنتالیا',
     description: 'ساحل آبی مدیترانه، هتل‌های لوکس و تفریحات دریایی',
     location: 'ترکیه',
@@ -34,14 +34,14 @@ const FEATURED_TOURS = [
     badgeType: 'gold',
   },
   {
-    slug: 'armenia-water',
-    title: 'جشن آب ارمنستان',
-    description: 'تجربه جشنواره وارداوار؛ شادترین رویداد تابستانی قفقاز',
-    location: 'ارمنستان',
-    flag: '🇦🇲',
-    duration: '۴ شب | ۵ روز',
-    price: '۵۵۰$',
-    badge: 'رویداد ویژه',
+    slug: 'istanbul-tour',
+    title: 'تور استانبول',
+    description: 'شهر دو قاره، تاریخ و مدرنیته در یک مقصد رویایی',
+    location: 'ترکیه',
+    flag: '🇹🇷',
+    duration: '۵ شب | ۶ روز',
+    price: '۶۵۰$',
+    badge: 'محبوب',
     badgeType: 'info',
   },
 ];
@@ -176,7 +176,7 @@ export default function Home() {
                   className="group flex flex-col overflow-hidden rounded-[2rem] border border-white/5 bg-slate-900/20 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-cyan-500/30 hover:bg-slate-900/40 shadow-xl"
                 >
                   <div className="relative h-64 overflow-hidden bg-slate-900">
-                    <Image src={`/images/${tour.slug}.jpg`} alt={tour.title} fill className="object-cover transition duration-500 group-hover:scale-105" />
+                    <Image src={`/images/tours/${tour.slug}.jpg`} alt={tour.title} fill className="object-cover transition duration-500 group-hover:scale-105" />
                     <div className="absolute right-4 top-4 rounded-xl bg-slate-950/80 backdrop-blur-md px-3 py-1.5 text-xs font-bold text-cyan-400 ring-1 ring-white/10">
                       {tour.badge}
                     </div>

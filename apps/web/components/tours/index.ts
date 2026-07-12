@@ -9,3 +9,4 @@ export { default as TourTips } from './TourTips';
 export { default as RelatedTours } from './RelatedTours';
 export { default as BookingCTA } from './BookingCTA';
 export { default as TourPageTemplate } from './TourPageTemplate';
+export { default as TourCard } from './TourCard';
