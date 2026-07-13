@@ -9,6 +9,7 @@ const vazirmatn = Vazirmatn({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://atashtravel.com'),
   title: "آتاش تراول",
   description: "آتاش تراول - بهترین تورهای خارجی با قیمت مناسب و خدمات ویژه",
 };
