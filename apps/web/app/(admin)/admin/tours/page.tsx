@@ -108,7 +108,7 @@ export default function AdminToursPage() {
             href="/admin/tours/new"
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold"
           >
-            + افزودن تور جدید
+            افزودن تور جدید
           </Link>
         </div>
 
@@ -249,7 +249,7 @@ export default function AdminToursPage() {
                 href="/admin/tours/new"
                 className="inline-block mt-4 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
               >
-                افزودن اولین تور
+                افزودن تور جدید
               </Link>
             </div>
           )}
