@@ -634,22 +634,61 @@ model Tour {
   id               String    @id @default(uuid())
   slug             String    @unique
   title            String
+  destination      String?
   shortDescription String?   @map("short_description") @db.Text
+  fullDescription  String?   @map("full_description") @db.Text
   description      String?   @db.Text
   countryId        String    @map("country_id")
   cityId           String?   @map("city_id")
   categoryId       String?   @map("tour_category_id")
+  
+  // Duration
+  duration         String?   // e.g., "3 شب و 4 روز"
   durationDays     Int       @map("duration_days")
   durationNights   Int       @map("duration_nights")
+  
+  // Price
+  price            String?   // e.g., "450$"
+  priceDetail      String?   @map("price_detail")
+  
+  // Images
+  coverImage       String?   @map("cover_image")
+  heroImage        String?   @map("hero_image")
+  galleryImages    Json?     @map("gallery_images") // Array of image URLs
+  
+  // Logistics
+  departureInfo    String?   @map("departure_info") @db.Text
+  hotelInfo        String?   @map("hotel_info") @db.Text
+  transportation   String?   @db.Text
+  
+  // Additional info
+  whyChoose        Json?     @map("why_choose") // Array of strings
+  bestTime         String?   @map("best_time") @db.Text
+  attractions      Json?     // Array of attraction objects
+  tips             Json?     // Array of strings
+  requiredDocuments Json?    @map("required_documents") // Array of strings
+  faqs             Json?     // Array of FAQ objects
+  
+  // Related tours
+  relatedTours     Json?     @map("related_tours") // Array of tour slugs
+  
+  // Old fields
   meetingPoint     String?   @map("meeting_point")
   transportType    String?   @map("transport_type")
   difficulty       String?
   minimumAge       Int?      @map("minimum_age")
   maximumPeople    Int?      @map("maximum_people")
+  
+  // Status
   featured         Boolean   @default(false)
-  status           String    @default("active")
+  status           String    @default("draft") // draft, active, inactive
+  
+  // SEO
   seoTitle         String?   @map("seo_title")
   seoDescription   String?   @map("seo_description") @db.Text
+  seoKeywords      Json?     @map("seo_keywords") // Array of keywords
+  seoOgImage       String?   @map("seo_og_image")
+  
   createdAt        DateTime  @default(now()) @map("created_at")
   updatedAt        DateTime  @updatedAt @map("updated_at")
   deletedAt        DateTime? @map("deleted_at")

@@ -9,6 +9,7 @@ import { UserModule } from './modules/user/user.module';
 import { TourModule } from './modules/tour/tour.module';
 import { HotelModule } from './modules/hotel/hotel.module';
 import { BookingModule } from './modules/booking/booking.module';
+import { UploadModule } from './modules/upload/upload.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { RolesGuard } from './modules/auth/guards/roles.guard';
 import { PermissionsGuard } from './modules/auth/guards/permissions.guard';
@@ -29,6 +30,7 @@ import configuration from './config/configuration';
     TourModule,
     HotelModule,
     BookingModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [

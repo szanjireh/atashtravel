@@ -58,4 +58,64 @@ apiClient.interceptors.response.use(
   }
 );
 
+// Tour API functions
+export const tourApi = {
+  // Get all tours
+  async getAll(params?: { page?: number; limit?: number; search?: string; status?: string }) {
+    const response = await apiClient.get('/tours', { params });
+    return response.data;
+  },
+
+  // Get single tour by slug or ID
+  async getOne(slugOrId: string) {
+    const response = await apiClient.get(`/tours/${slugOrId}`);
+    return response.data;
+  },
+
+  // Get featured tours
+  async getFeatured(limit = 6) {
+    const response = await apiClient.get('/tours/featured', { params: { limit } });
+    return response.data;
+  },
+
+  // Create tour (admin)
+  async create(data: any) {
+    const response = await apiClient.post('/tours', data);
+    return response.data;
+  },
+
+  // Update tour (admin)
+  async update(id: string, data: any) {
+    const response = await apiClient.patch(`/tours/${id}`, data);
+    return response.data;
+  },
+
+  // Delete tour (admin)
+  async delete(id: string) {
+    const response = await apiClient.delete(`/tours/${id}`);
+    return response.data;
+  },
+};
+
+// Upload API functions
+export const uploadApi = {
+  async uploadImage(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await apiClient.post('/upload/tour-image', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
+
+  async uploadImages(files: File[]) {
+    const formData = new FormData();
+    files.forEach(file => formData.append('files', file));
+    const response = await apiClient.post('/upload/images', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
+};
+
 export default apiClient;

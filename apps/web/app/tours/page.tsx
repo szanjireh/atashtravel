@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import Header from '@/components/header';
 import TourCard from '@/components/tours/TourCard';
-import { toursData } from '@/data/tours';
 
 export const metadata: Metadata = {
   title: 'تورهای خارجی | رزرو تور ترکیه و دبی | آتاش تراول',
@@ -18,9 +17,29 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ToursPage() {
-  // Get all tours as array
-  const tours = Object.values(toursData);
+// Fetch tours from API - Server Component
+async function getTours() {
+  try {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+    const response = await fetch(`${API_URL}/tours?limit=100&status=active`, {
+      next: { revalidate: 60 }, // Revalidate every 60 seconds
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch tours');
+    }
+    
+    const data = await response.json();
+    return data.data || [];
+  } catch (error) {
+    console.error('Error fetching tours:', error);
+    return [];
+  }
+}
+
+export default async function ToursPage() {
+  // Get tours from API
+  const tours = await getTours();
 
   return (
     <main dir="rtl" className="relative min-h-screen overflow-hidden bg-[#030712] text-slate-100 font-sans selection:bg-cyan-500 selection:text-slate-950">
