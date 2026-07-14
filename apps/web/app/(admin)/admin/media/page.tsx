@@ -241,20 +241,3 @@ export default function AdminMediaPage() {
     </div>
   );
 }
-              <span className="w-2 h-2 bg-pink-500 rounded-full"></span>
-              <span>ویرایش تصاویر</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 bg-pink-500 rounded-full"></span>
-              <span>مدیریت گالری</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 bg-pink-500 rounded-full"></span>
-              <span>بهینه‌سازی حجم</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}

@@ -222,11 +222,3 @@ export default function AdminHotelsPage() {
     </div>
   );
 }
-              <span>سیستم رزرواسیون</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}

@@ -220,21 +220,3 @@ export default function AdminVisaPage() {
     </div>
   );
 }
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-              <span>مدارک مورد نیاز</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-              <span>فرآیند درخواست</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-              <span>مدیریت درخواست‌ها</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}

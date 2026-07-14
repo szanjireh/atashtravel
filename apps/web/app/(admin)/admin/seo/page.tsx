@@ -330,12 +330,3 @@ export default function AdminSEOPage() {
     </div>
   );
 }
-              <span className="w-2 h-2 bg-indigo-500 rounded-full"></span>
-              <span>تحلیل کلمات کلیدی</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
