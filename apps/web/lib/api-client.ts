@@ -118,4 +118,182 @@ export const uploadApi = {
   },
 };
 
+// Hotel API functions
+export const hotelApi = {
+  async getAll(params?: { page?: number; limit?: number; search?: string; status?: string }) {
+    const response = await apiClient.get('/hotels', { params });
+    return response.data;
+  },
+
+  async getOne(slugOrId: string) {
+    const response = await apiClient.get(`/hotels/${slugOrId}`);
+    return response.data;
+  },
+
+  async create(data: any) {
+    const response = await apiClient.post('/hotels', data);
+    return response.data;
+  },
+
+  async update(id: string, data: any) {
+    const response = await apiClient.patch(`/hotels/${id}`, data);
+    return response.data;
+  },
+
+  async delete(id: string) {
+    const response = await apiClient.delete(`/hotels/${id}`);
+    return response.data;
+  },
+
+  async updateStatus(id: string, status: string) {
+    const response = await apiClient.patch(`/hotels/${id}/status`, { status });
+    return response.data;
+  },
+};
+
+// Visa API functions
+export const visaApi = {
+  async getAll(params?: { page?: number; limit?: number; search?: string; status?: string }) {
+    const response = await apiClient.get('/visa', { params });
+    return response.data;
+  },
+
+  async getOne(slugOrId: string) {
+    const response = await apiClient.get(`/visa/${slugOrId}`);
+    return response.data;
+  },
+
+  async getFeatured(limit = 6) {
+    const response = await apiClient.get('/visa/featured', { params: { limit } });
+    return response.data;
+  },
+
+  async create(data: any) {
+    const response = await apiClient.post('/visa', data);
+    return response.data;
+  },
+
+  async update(id: string, data: any) {
+    const response = await apiClient.patch(`/visa/${id}`, data);
+    return response.data;
+  },
+
+  async delete(id: string) {
+    const response = await apiClient.delete(`/visa/${id}`);
+    return response.data;
+  },
+
+  async updateStatus(id: string, status: string) {
+    const response = await apiClient.patch(`/visa/${id}/status`, { status });
+    return response.data;
+  },
+};
+
+// Blog API functions
+export const blogApi = {
+  async getAll(params?: { page?: number; limit?: number; search?: string; status?: string; published?: boolean }) {
+    const response = await apiClient.get('/blog', { params });
+    return response.data;
+  },
+
+  async getOne(slugOrId: string) {
+    const response = await apiClient.get(`/blog/${slugOrId}`);
+    return response.data;
+  },
+
+  async getFeatured(limit = 6) {
+    const response = await apiClient.get('/blog/featured', { params: { limit } });
+    return response.data;
+  },
+
+  async create(data: any) {
+    const response = await apiClient.post('/blog', data);
+    return response.data;
+  },
+
+  async update(id: string, data: any) {
+    const response = await apiClient.patch(`/blog/${id}`, data);
+    return response.data;
+  },
+
+  async delete(id: string) {
+    const response = await apiClient.delete(`/blog/${id}`);
+    return response.data;
+  },
+
+  async togglePublish(id: string, published: boolean) {
+    const response = await apiClient.patch(`/blog/${id}/publish`, { published });
+    return response.data;
+  },
+
+  async toggleFeatured(id: string, featured: boolean) {
+    const response = await apiClient.patch(`/blog/${id}/featured`, { featured });
+    return response.data;
+  },
+};
+
+// Media API functions
+export const mediaApi = {
+  async getAll(params?: { page?: number; limit?: number; type?: string; folder?: string }) {
+    const response = await apiClient.get('/media', { params });
+    return response.data;
+  },
+
+  async getOne(id: string) {
+    const response = await apiClient.get(`/media/${id}`);
+    return response.data;
+  },
+
+  async upload(file: File, folder?: string, alt?: string, caption?: string) {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (folder) formData.append('folder', folder);
+    if (alt) formData.append('alt', alt);
+    if (caption) formData.append('caption', caption);
+    
+    const response = await apiClient.post('/media/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
+
+  async delete(id: string) {
+    const response = await apiClient.delete(`/media/${id}`);
+    return response.data;
+  },
+};
+
+// SEO API functions
+export const seoApi = {
+  async getAll(params?: { page?: number; limit?: number; search?: string }) {
+    const response = await apiClient.get('/seo', { params });
+    return response.data;
+  },
+
+  async getOne(id: string) {
+    const response = await apiClient.get(`/seo/${id}`);
+    return response.data;
+  },
+
+  async getByPage(page: string) {
+    const response = await apiClient.get(`/seo/page/${page}`);
+    return response.data;
+  },
+
+  async create(data: any) {
+    const response = await apiClient.post('/seo', data);
+    return response.data;
+  },
+
+  async update(id: string, data: any) {
+    const response = await apiClient.patch(`/seo/${id}`, data);
+    return response.data;
+  },
+
+  async delete(id: string) {
+    const response = await apiClient.delete(`/seo/${id}`);
+    return response.data;
+  },
+};
+
 export default apiClient;

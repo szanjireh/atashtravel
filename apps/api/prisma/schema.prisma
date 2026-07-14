@@ -2,7 +2,7 @@
 // Version: 2.0.0
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["debian-openssl-3.0.x", "debian-openssl-1.1.x"]
 }
 
@@ -631,67 +631,67 @@ model TourCategory {
 }
 
 model Tour {
-  id               String    @id @default(uuid())
-  slug             String    @unique
+  id               String  @id @default(uuid())
+  slug             String  @unique
   title            String
   destination      String?
-  shortDescription String?   @map("short_description") @db.Text
-  fullDescription  String?   @map("full_description") @db.Text
-  description      String?   @db.Text
-  countryId        String    @map("country_id")
-  cityId           String?   @map("city_id")
-  categoryId       String?   @map("tour_category_id")
-  
+  shortDescription String? @map("short_description") @db.Text
+  fullDescription  String? @map("full_description") @db.Text
+  description      String? @db.Text
+  countryId        String  @map("country_id")
+  cityId           String? @map("city_id")
+  categoryId       String? @map("tour_category_id")
+
   // Duration
-  duration         String?   // e.g., "3 شب و 4 روز"
-  durationDays     Int       @map("duration_days")
-  durationNights   Int       @map("duration_nights")
-  
+  duration       String? // e.g., "3 شب و 4 روز"
+  durationDays   Int     @map("duration_days")
+  durationNights Int     @map("duration_nights")
+
   // Price
-  price            String?   // e.g., "450$"
-  priceDetail      String?   @map("price_detail")
-  
+  price       String? // e.g., "450$"
+  priceDetail String? @map("price_detail")
+
   // Images
-  coverImage       String?   @map("cover_image")
-  heroImage        String?   @map("hero_image")
-  galleryImages    Json?     @map("gallery_images") // Array of image URLs
-  
+  coverImage    String? @map("cover_image")
+  heroImage     String? @map("hero_image")
+  galleryImages Json?   @map("gallery_images") // Array of image URLs
+
   // Logistics
-  departureInfo    String?   @map("departure_info") @db.Text
-  hotelInfo        String?   @map("hotel_info") @db.Text
-  transportation   String?   @db.Text
-  
+  departureInfo  String? @map("departure_info") @db.Text
+  hotelInfo      String? @map("hotel_info") @db.Text
+  transportation String? @db.Text
+
   // Additional info
-  whyChoose        Json?     @map("why_choose") // Array of strings
-  bestTime         String?   @map("best_time") @db.Text
-  attractions      Json?     // Array of attraction objects
-  tips             Json?     // Array of strings
-  requiredDocuments Json?    @map("required_documents") // Array of strings
-  faqs             Json?     // Array of FAQ objects
-  
+  whyChoose         Json?   @map("why_choose") // Array of strings
+  bestTime          String? @map("best_time") @db.Text
+  attractions       Json? // Array of attraction objects
+  tips              Json? // Array of strings
+  requiredDocuments Json?   @map("required_documents") // Array of strings
+  faqs              Json? // Array of FAQ objects
+
   // Related tours
-  relatedTours     Json?     @map("related_tours") // Array of tour slugs
-  
+  relatedTours Json? @map("related_tours") // Array of tour slugs
+
   // Old fields
-  meetingPoint     String?   @map("meeting_point")
-  transportType    String?   @map("transport_type")
-  difficulty       String?
-  minimumAge       Int?      @map("minimum_age")
-  maximumPeople    Int?      @map("maximum_people")
-  
+  meetingPoint  String? @map("meeting_point")
+  transportType String? @map("transport_type")
+  difficulty    String?
+  minimumAge    Int?    @map("minimum_age")
+  maximumPeople Int?    @map("maximum_people")
+
   // Status
-  featured         Boolean   @default(false)
-  status           String    @default("draft") // draft, active, inactive
-  
+  featured Boolean @default(false)
+  status   String  @default("draft") // draft, active, inactive
+
   // SEO
-  seoTitle         String?   @map("seo_title")
-  seoDescription   String?   @map("seo_description") @db.Text
-  seoKeywords      Json?     @map("seo_keywords") // Array of keywords
-  seoOgImage       String?   @map("seo_og_image")
-  
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
-  deletedAt        DateTime? @map("deleted_at")
+  seoTitle       String? @map("seo_title")
+  seoDescription String? @map("seo_description") @db.Text
+  seoKeywords    Json?   @map("seo_keywords") // Array of keywords
+  seoOgImage     String? @map("seo_og_image")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
   country     Country           @relation(fields: [countryId], references: [id], onDelete: Restrict)
   city        City?             @relation(fields: [cityId], references: [id], onDelete: SetNull)
@@ -1579,4 +1579,150 @@ model VisaRequirement {
   visaType VisaType @relation(fields: [visaTypeId], references: [id], onDelete: Cascade)
 
   @@map("visa_requirements")
+}
+
+// ============================================
+// VISA SERVICES (Enhanced)
+// ============================================
+
+model VisaService {
+  id             String   @id @default(uuid())
+  title          String
+  slug           String   @unique
+  countryId      String?  @map("country_id")
+  description    String?  @db.Text
+  processingDays Int      @map("processing_days")
+  price          Decimal  @db.Decimal(10, 2)
+  currency       String   @default("USD")
+  requirements   Json? // Array of requirement strings
+  documents      Json? // Array of document strings
+  steps          Json? // Array of process steps
+  status         String   @default("active")
+  featured       Boolean  @default(false)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([slug])
+  @@index([status])
+  @@map("visa_services")
+}
+
+// ============================================
+// BLOG & ARTICLES
+// ============================================
+
+model BlogCategory {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  parentId  String?  @map("parent_id")
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  parent   BlogCategory?  @relation("BlogCategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children BlogCategory[] @relation("BlogCategoryHierarchy")
+  articles Article[]
+
+  @@map("blog_categories")
+}
+
+model Article {
+  id             String    @id @default(uuid())
+  title          String
+  slug           String    @unique
+  excerpt        String?   @db.Text
+  content        String    @db.Text
+  coverImage     String?   @map("cover_image")
+  categoryId     String?   @map("category_id")
+  authorId       String?   @map("author_id")
+  status         String    @default("draft") // draft, published, archived
+  published      Boolean   @default(false)
+  featured       Boolean   @default(false)
+  publishedAt    DateTime? @map("published_at")
+  seoTitle       String?   @map("seo_title")
+  seoDescription String?   @map("seo_description") @db.Text
+  seoKeywords    Json?     @map("seo_keywords")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  deletedAt      DateTime? @map("deleted_at")
+
+  category BlogCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tags     ArticleTag[]
+
+  @@index([slug])
+  @@index([status])
+  @@index([published])
+  @@index([featured])
+  @@map("articles")
+}
+
+model Tag {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  slug      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+
+  articles ArticleTag[]
+
+  @@map("tags")
+}
+
+model ArticleTag {
+  articleId String @map("article_id")
+  tagId     String @map("tag_id")
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  tag     Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, tagId])
+  @@map("article_tags")
+}
+
+// ============================================
+// MEDIA LIBRARY
+// ============================================
+
+model MediaLibrary {
+  id         String   @id @default(uuid())
+  filename   String
+  url        String
+  type       String // image, video, document
+  mimeType   String   @map("mime_type")
+  size       Int // in bytes
+  width      Int?
+  height     Int?
+  alt        String?
+  caption    String?
+  folder     String? // optional organization
+  uploadedBy String?  @map("uploaded_by")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@index([type])
+  @@index([folder])
+  @@map("media_library")
+}
+
+// ============================================
+// SEO MANAGEMENT
+// ============================================
+
+model SEOPage {
+  id             String   @id @default(uuid())
+  page           String   @unique // e.g., "home", "tours", "about", or specific slug
+  title          String
+  description    String   @db.Text
+  keywords       Json? // Array of keywords
+  ogTitle        String?  @map("og_title")
+  ogDescription  String?  @map("og_description") @db.Text
+  ogImage        String?  @map("og_image")
+  canonicalUrl   String?  @map("canonical_url")
+  robots         String? // e.g., "index,follow"
+  structuredData Json?    @map("structured_data") // JSON-LD
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([page])
+  @@map("seo_pages")
 }
