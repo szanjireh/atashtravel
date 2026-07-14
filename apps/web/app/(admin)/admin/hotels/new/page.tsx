@@ -21,8 +21,9 @@ interface HotelFormData {
   status: string;
 }
 
-export default function HotelFormPage() {
+export default function HotelFormPage({ params }: { params?: { id: string } }) {
   const router = useRouter();
+  const isEdit = !!params?.id;
   
   const [formData, setFormData] = useState<HotelFormData>({
     name: '',
@@ -41,10 +42,14 @@ export default function HotelFormPage() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(isEdit);
   const [countries, setCountries] = useState<any[]>([]);
 
   useEffect(() => {
     loadCountries();
+    if (isEdit) {
+      loadHotel();
+    }
   }, []);
 
   const loadCountries = async () => {
@@ -59,6 +64,18 @@ export default function HotelFormPage() {
     }
   };
 
+  const loadHotel = async () => {
+    try {
+      setInitialLoading(true);
+      const response = await apiClient.get(`/hotels/${params?.id}`);
+      setFormData(response.data.data);
+    } catch (err) {
+      console.error('Error loading hotel:', err);
+    } finally {
+      setInitialLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -70,8 +87,13 @@ export default function HotelFormPage() {
         starRating: parseInt(formData.starRating.toString()),
       };
 
-      await apiClient.post('/hotels', payload);
-      alert('هتل با موفقیت ایجاد شد');
+      if (isEdit) {
+        await apiClient.patch(`/hotels/${params?.id}`, payload);
+        alert('هتل با موفقیت بروزرسانی شد');
+      } else {
+        await apiClient.post('/hotels', payload);
+        alert('هتل با موفقیت ایجاد شد');
+      }
       router.push('/admin/hotels');
     } catch (err: any) {
       alert(err.response?.data?.message || 'خطا در ذخیره هتل');
@@ -88,11 +110,24 @@ export default function HotelFormPage() {
     setFormData(prev => ({ ...prev, slug }));
   };
 
+  if (initialLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-8 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">در حال بارگذاری...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-8 rtl" dir="rtl">
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">افزودن هتل جدید</h1>
+          <h1 className="text-3xl font-bold">
+            {isEdit ? 'ویرایش هتل' : 'افزودن هتل جدید'}
+          </h1>
           <button
             onClick={() => router.push('/admin/hotels')}
             className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900"
@@ -315,7 +350,7 @@ export default function HotelFormPage() {
                   disabled={loading}
                   className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50"
                 >
-                  {loading ? 'در حال ذخیره...' : 'ایجاد هتل'}
+                  {loading ? 'در حال ذخیره...' : isEdit ? 'بروزرسانی هتل' : 'ایجاد هتل'}
                 </button>
                 <button
                   type="button"

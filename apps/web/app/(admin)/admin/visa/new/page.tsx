@@ -19,8 +19,9 @@ interface VisaFormData {
   requirements: VisaRequirement[];
 }
 
-export default function VisaFormPage() {
+export default function VisaFormPage({ params }: { params?: { id: string } }) {
   const router = useRouter();
+  const isEdit = !!params?.id;
   
   const [formData, setFormData] = useState<VisaFormData>({
     countryId: '',
@@ -32,11 +33,15 @@ export default function VisaFormPage() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(isEdit);
   const [countries, setCountries] = useState<any[]>([]);
   const [newRequirement, setNewRequirement] = useState({ title: '', description: '' });
 
   useEffect(() => {
     loadCountries();
+    if (isEdit) {
+      loadVisa();
+    }
   }, []);
 
   const loadCountries = async () => {
@@ -48,6 +53,18 @@ export default function VisaFormPage() {
       ]);
     } catch (err) {
       console.error('Error loading countries:', err);
+    }
+  };
+
+  const loadVisa = async () => {
+    try {
+      setInitialLoading(true);
+      const response = await apiClient.get(`/visa/${params?.id}`);
+      setFormData(response.data.data);
+    } catch (err) {
+      console.error('Error loading visa:', err);
+    } finally {
+      setInitialLoading(false);
     }
   };
 
@@ -63,8 +80,13 @@ export default function VisaFormPage() {
         price: parseFloat(formData.price),
       };
 
-      await apiClient.post('/visa-types', payload);
-      alert('سرویس ویزا با موفقیت ایجاد شد');
+      if (isEdit) {
+        await apiClient.patch(`/visa/${params?.id}`, payload);
+        alert('سرویس ویزا با موفقیت بروزرسانی شد');
+      } else {
+        await apiClient.post('/visa', payload);
+        alert('سرویس ویزا با موفقیت ایجاد شد');
+      }
       router.push('/admin/visa');
     } catch (err: any) {
       alert(err.response?.data?.message || 'خطا در ذخیره سرویس ویزا');
@@ -90,11 +112,24 @@ export default function VisaFormPage() {
     }));
   };
 
+  if (initialLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-8 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">در حال بارگذاری...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-8 rtl" dir="rtl">
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">افزودن سرویس ویزا</h1>
+          <h1 className="text-3xl font-bold">
+            {isEdit ? 'ویرایش سرویس ویزا' : 'افزودن سرویس ویزا'}
+          </h1>
           <button
             onClick={() => router.push('/admin/visa')}
             className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900"
@@ -277,7 +312,7 @@ export default function VisaFormPage() {
                   disabled={loading}
                   className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
                 >
-                  {loading ? 'در حال ذخیره...' : 'ایجاد سرویس ویزا'}
+                  {loading ? 'در حال ذخیره...' : isEdit ? 'بروزرسانی سرویس' : 'ایجاد سرویس'}
                 </button>
                 <button
                   type="button"

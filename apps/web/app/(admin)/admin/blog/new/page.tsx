@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api-client';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 interface BlogFormData {
   title: string;
@@ -17,8 +17,9 @@ interface BlogFormData {
   tags: string[];
 }
 
-export default function BlogFormPage() {
+export default function BlogFormPage({ params }: { params?: { id: string } }) {
   const router = useRouter();
+  const isEdit = !!params?.id;
   
   const [formData, setFormData] = useState<BlogFormData>({
     title: '',
@@ -33,8 +34,27 @@ export default function BlogFormPage() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(isEdit);
   const [currentTab, setCurrentTab] = useState('basic');
   const [tagInput, setTagInput] = useState('');
+
+  useEffect(() => {
+    if (isEdit) {
+      loadArticle();
+    }
+  }, []);
+
+  const loadArticle = async () => {
+    try {
+      setInitialLoading(true);
+      const response = await apiClient.get(`/blog/${params?.id}`);
+      setFormData(response.data.data);
+    } catch (err) {
+      console.error('Error loading article:', err);
+    } finally {
+      setInitialLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,8 +66,13 @@ export default function BlogFormPage() {
         ...formData,
       };
 
-      await apiClient.post('/blog', payload);
-      alert('مقاله با موفقیت ایجاد شد');
+      if (isEdit) {
+        await apiClient.patch(`/blog/${params?.id}`, payload);
+        alert('مقاله با موفقیت بروزرسانی شد');
+      } else {
+        await apiClient.post('/blog', payload);
+        alert('مقاله با موفقیت ایجاد شد');
+      }
       router.push('/admin/blog');
     } catch (err: any) {
       alert(err.response?.data?.message || 'خطا در ذخیره مقاله');
@@ -81,11 +106,24 @@ export default function BlogFormPage() {
     }));
   };
 
+  if (initialLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-8 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">در حال بارگذاری...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-8 rtl" dir="rtl">
       <div className="max-w-5xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">نوشتن مقاله جدید</h1>
+          <h1 className="text-3xl font-bold">
+            {isEdit ? 'ویرایش مقاله' : 'نوشتن مقاله جدید'}
+          </h1>
           <button
             onClick={() => router.push('/admin/blog')}
             className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900"
@@ -304,7 +342,7 @@ export default function BlogFormPage() {
                 disabled={loading}
                 className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50"
               >
-                {loading ? 'در حال ذخیره...' : 'ایجاد مقاله'}
+                {loading ? 'در حال ذخیره...' : isEdit ? 'بروزرسانی مقاله' : 'ایجاد مقاله'}
               </button>
               <button
                 type="button"
