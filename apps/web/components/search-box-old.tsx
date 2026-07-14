@@ -103,3 +103,77 @@ export default function SearchBox() {
     </form>
   );
 }
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSearch();
+                  }
+                }}
+                placeholder="جستجو کنید..."
+                className="w-full bg-slate-900/60 border border-white/10 rounded-xl py-2.5 pr-10 pl-3 text-sm text-slate-100 placeholder-slate-500 transition-all duration-200 focus:outline-none focus:border-cyan-500/50 focus:bg-slate-900"
+                autoFocus
+              />
+              {query && (
+                <button
+                  onClick={() => setQuery('')}
+                  className="absolute left-3 p-1 hover:bg-white/10 rounded-lg transition-colors"
+                  aria-label="پاک کردن"
+                >
+                  <X className="h-4 w-4 text-slate-400" />
+                </button>
+              )}
+            </div>
+
+            {/* Suggestions */}
+            {(suggestions.length > 0 || !query) && (
+              <div className="space-y-1">
+                <div className="px-2 py-1.5">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    {query ? 'نتایج پیشنهادی' : 'جستجوهای محبوب'}
+                  </p>
+                </div>
+                <div className="max-h-64 overflow-y-auto space-y-1">
+                  {(query ? suggestions : allSuggestions.slice(0, 5)).map((suggestion, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleSuggestionClick(suggestion)}
+                      className="w-full flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm text-slate-300 transition-all duration-150 hover:bg-cyan-500/10 hover:text-cyan-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/50 text-right"
+                    >
+                      <span className="text-slate-500">{suggestion}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Search Button */}
+            {query && (
+              <button
+                onClick={handleSearch}
+                className="w-full py-2.5 px-4 bg-gradient-to-r from-cyan-500 to-sky-500 text-slate-950 text-sm font-semibold rounded-xl transition-all duration-200 hover:opacity-95 active:scale-95"
+              >
+                جستجو برای "{query}"
+              </button>
+            )}
+
+            {/* Empty State */}
+            {!query && suggestions.length === 0 && (
+              <div className="text-center py-6">
+                <p className="text-sm text-slate-400">شروع کنید تا نتایج را ببینید</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Backdrop */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+    </div>
+  );
+}
