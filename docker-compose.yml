@@ -144,7 +144,7 @@ services:
   # Certbot (SSL Certificate Management)
   # ------------------------------------------
   certbot:
-    image: certbot/certbot:latest
+    image: certbot/certbot:v5.0.0
     container_name: talaseen-certbot
     restart: unless-stopped
     volumes:
