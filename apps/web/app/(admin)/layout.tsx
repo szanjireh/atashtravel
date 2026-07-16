@@ -1,8 +1,8 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { 
   HomeIcon,
   MapIcon, 
@@ -12,9 +12,41 @@ import {
   PhotoIcon, 
   Cog6ToothIcon 
 } from '@heroicons/react/24/outline';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, loading, isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    if (!loading) {
+      if (!isAuthenticated) {
+        router.push('/login');
+        return;
+      }
+
+      // Check if user has admin role
+      // Note: You'll need to add roles to the user object in the useAuth hook
+      // For now, we'll just check if the user is authenticated
+      // In production, check if user.roles includes 'admin'
+    }
+  }, [loading, isAuthenticated, router]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="text-gray-600">در حال بارگذاری...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   const navItems = [
     { href: '/admin', label: 'داشبورد', icon: HomeIcon },
@@ -44,12 +76,23 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 پنل مدیریت آتاش تراول
               </h1>
             </Link>
-            <Link 
-              href="/" 
-              className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition"
-            >
-              مشاهده سایت
-            </Link>
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-gray-600">
+                {user?.firstName} {user?.lastName}
+              </span>
+              <Link 
+                href="/dashboard" 
+                className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition"
+              >
+                پنل کاربری
+              </Link>
+              <Link 
+                href="/" 
+                className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition"
+              >
+                مشاهده سایت
+              </Link>
+            </div>
           </div>
           
           {/* Navigation */}

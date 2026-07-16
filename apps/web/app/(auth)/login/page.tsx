@@ -1,18 +1,28 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { authService } from '@/services/auth.service';
+import { CheckCircle } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+
+  useEffect(() => {
+    // Check for verification success
+    if (searchParams.get('verified') === 'true') {
+      setSuccessMessage('ایمیل شما با موفقیت تایید شد. اکنون می‌توانید وارد شوید.');
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +33,18 @@ export default function LoginPage() {
       await authService.login(formData);
       router.push('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'خطا در ورود');
+      const errorMessage = err.response?.data?.message || 'خطا در ورود';
+      
+      // Map backend errors to user-friendly messages
+      if (errorMessage.includes('ایمیل یا رمز عبور')) {
+        setError('ایمیل یا رمز عبور اشتباه است');
+      } else if (errorMessage.includes('غیرفعال')) {
+        setError('حساب کاربری شما غیرفعال شده است. لطفاً با پشتیبانی تماس بگیرید');
+      } else if (errorMessage.includes('تایید')) {
+        setError('لطفاً ابتدا ایمیل خود را تایید کنید');
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -40,6 +61,12 @@ export default function LoginPage() {
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
+            {successMessage && (
+              <div className="bg-green-50 text-green-600 p-3 rounded-md text-sm flex items-start gap-2">
+                <CheckCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                <span>{successMessage}</span>
+              </div>
+            )}
             {error && (
               <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
                 {error}
@@ -56,6 +83,7 @@ export default function LoginPage() {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
+                disabled={loading}
               />
             </div>
             <div className="space-y-2">
@@ -69,6 +97,7 @@ export default function LoginPage() {
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
+                disabled={loading}
               />
             </div>
             <div className="text-sm text-right">

@@ -127,6 +127,11 @@ export class AuthService {
       throw new UnauthorizedException('ایمیل یا رمز عبور اشتباه است');
     }
 
+    // Check if email is verified (optional: can be enabled later)
+    // if (!user.isVerified) {
+    //   throw new UnauthorizedException('لطفاً ابتدا ایمیل خود را تایید کنید');
+    // }
+
     // Get roles
     const roles = user.userRoles.map((ur) => ur.role.name);
 

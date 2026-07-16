@@ -90,6 +90,16 @@ export class AuthController {
   }
 
   @Public()
+  @Get('verify-email/:token')
+  @ApiOperation({ summary: 'تایید ایمیل از طریق لینک' })
+  @ApiResponse({ status: 200, description: 'ایمیل با موفقیت تایید شد' })
+  @ApiResponse({ status: 400, description: 'لینک تایید نامعتبر است' })
+  async verifyEmailByLink(@Req() req: any) {
+    const token = req.params.token;
+    return this.authService.verifyEmail(token);
+  }
+
+  @Public()
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'درخواست بازیابی رمز عبور' })

@@ -78,10 +78,33 @@ export default function RegisterPage() {
 
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Split fullName into firstName and lastName
+      const nameParts = formData.fullName.trim().split(' ');
+      const firstName = nameParts[0];
+      const lastName = nameParts.slice(1).join(' ') || nameParts[0];
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1'}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          email: formData.email,
+          phone: formData.phone,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'خطا در ثبت‌نام');
+      }
+
       setSuccess(true);
-      setIsLoading(false);
       setFormData({
         fullName: '',
         email: '',
@@ -89,7 +112,11 @@ export default function RegisterPage() {
         password: '',
         confirmPassword: '',
       });
-    }, 1500);
+    } catch (error: any) {
+      setErrors({ general: error.message || 'خطا در ثبت‌نام. لطفاً دوباره تلاش کنید.' });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -127,6 +154,13 @@ export default function RegisterPage() {
               {/* Form */}
               {!success && (
                 <form onSubmit={handleSubmit} className="space-y-4">
+                  {/* General Error */}
+                  {errors.general && (
+                    <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-3 text-center">
+                      <p className="text-sm text-red-400">{errors.general}</p>
+                    </div>
+                  )}
+
                   {/* Full Name */}
                   <div>
                     <label htmlFor="fullName" className="block text-sm font-medium text-slate-300 mb-2">
