@@ -28,7 +28,7 @@ const FEATURED_TOURS = [
   {
     slug: 'trabzon-tour',
     title: 'تور ترابزون',
-    description: 'دریاچه اوزون گل و دریای سیاه، صومعه تاریخی و تفریحات دریایی',
+    description: 'دریاچه اوزون گل و دریای سیاه، صومعه تاریخ÷ی و تفریحات دریایی',
     location: 'ترابزون، ترکیه',
     duration: '3 شب و 4 روز',
     price: '47000000',
