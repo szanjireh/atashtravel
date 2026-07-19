@@ -99,7 +99,7 @@ export default function TourFormPage({ params }: { params?: { id: string } }) {
       // Load countries - you'll need to implement this endpoint
       // For now using a simple list
       setCountries([
-        { id: '1', name: 'ترکیه' },
+        { id: 'e532e5bc-7e06-4d9f-a923-35f2bb0ea3a7', name: 'ترکیه' },
         { id: '2', name: 'ارمنستان' },
         { id: '3', name: 'گرجستان' },
       ]);
