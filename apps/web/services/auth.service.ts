@@ -23,13 +23,17 @@ export const authService = {
   },
 
   login: async (data: LoginData) => {
-    const response = await apiClient.post('/auth/login', data);
-    if (response.data.tokens) {
-      localStorage.setItem('accessToken', response.data.tokens.accessToken);
-      localStorage.setItem('refreshToken', response.data.tokens.refreshToken);
-    }
-    return response.data;
-  },
+  const response = await apiClient.post('/auth/login', data);
+
+  const tokens = response.data.data?.tokens;
+
+  if (tokens) {
+    localStorage.setItem('accessToken', tokens.accessToken);
+    localStorage.setItem('refreshToken', tokens.refreshToken);
+  }
+
+  return response.data;
+},
 
   logout: async () => {
     await apiClient.post('/auth/logout');
