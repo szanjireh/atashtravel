@@ -15,6 +15,10 @@ export interface User {
   status: string;
   preferredLanguage: string;
   preferredCurrency: string;
+
+  // Added for RBAC
+  roles: string[];
+  permissions: string[];
 }
 
 export interface AuthState {
@@ -26,6 +30,7 @@ export interface AuthState {
 
 export function useAuth() {
   const router = useRouter();
+
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
     loading: true,
@@ -36,6 +41,7 @@ export function useAuth() {
   const loadUser = useCallback(async () => {
     try {
       const accessToken = localStorage.getItem('accessToken');
+
       if (!accessToken) {
         setAuthState({
           user: null,
@@ -43,10 +49,12 @@ export function useAuth() {
           error: null,
           isAuthenticated: false,
         });
+
         return;
       }
 
       const data = await authService.getMe();
+
       setAuthState({
         user: data.user,
         loading: false,
@@ -55,16 +63,16 @@ export function useAuth() {
       });
     } catch (error: any) {
       console.error('Failed to load user:', error);
+
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+
       setAuthState({
         user: null,
         loading: false,
         error: error.message || 'خطا در بارگذاری اطلاعات کاربر',
         isAuthenticated: false,
       });
-      
-      // Clear tokens on error
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
     }
   }, []);
 
@@ -78,13 +86,17 @@ export function useAuth() {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+
       setAuthState({
         user: null,
         loading: false,
         error: null,
         isAuthenticated: false,
       });
-      router.push('/login');
+
+      router.replace('/login');
     }
   }, [router]);
 
@@ -92,9 +104,28 @@ export function useAuth() {
     await loadUser();
   }, [loadUser]);
 
+  const hasRole = useCallback(
+    (role: string) => {
+      return authState.user?.roles?.includes(role) ?? false;
+    },
+    [authState.user]
+  );
+
+  const hasPermission = useCallback(
+    (permission: string) => {
+      return authState.user?.permissions?.includes(permission) ?? false;
+    },
+    [authState.user]
+  );
+
+  const isAdmin = hasRole('admin');
+
   return {
     ...authState,
     logout,
     refreshUser,
+    hasRole,
+    hasPermission,
+    isAdmin,
   };
 }

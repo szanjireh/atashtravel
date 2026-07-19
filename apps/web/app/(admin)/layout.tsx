@@ -3,115 +3,170 @@
 import { ReactNode, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { 
+import {
   HomeIcon,
-  MapIcon, 
-  BuildingOfficeIcon, 
-  DocumentTextIcon, 
-  NewspaperIcon, 
-  PhotoIcon, 
-  Cog6ToothIcon 
+  MapIcon,
+  BuildingOfficeIcon,
+  DocumentTextIcon,
+  NewspaperIcon,
+  PhotoIcon,
+  Cog6ToothIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/hooks/useAuth';
 
-export default function AdminLayout({ children }: { children: ReactNode }) {
+export default function AdminLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading, isAuthenticated } = useAuth();
+
+  const {
+    user,
+    loading,
+    isAuthenticated,
+    logout, // باید در useAuth وجود داشته باشد
+  } = useAuth();
 
   useEffect(() => {
-    if (!loading) {
-      if (!isAuthenticated) {
-        router.push('/login');
-        return;
-      }
+    if (loading) return;
 
-      // Check if user has admin role
-      // Note: You'll need to add roles to the user object in the useAuth hook
-      // For now, we'll just check if the user is authenticated
-      // In production, check if user.roles includes 'admin'
+    if (!isAuthenticated) {
+      router.replace('/login');
+      return;
     }
-  }, [loading, isAuthenticated, router]);
+
+    // جلوگیری از ورود کاربران غیرادمین
+    if (user?.roles && !user.roles.includes('admin')) {
+      router.replace('/403');
+    }
+  }, [loading, isAuthenticated, user, router]);
 
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto" />
           <p className="text-gray-600">در حال بارگذاری...</p>
         </div>
       </div>
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated) return null;
+
+  if (user?.roles && !user.roles.includes('admin')) {
     return null;
   }
 
   const navItems = [
-    { href: '/admin', label: 'داشبورد', icon: HomeIcon },
-    { href: '/admin/tours', label: 'تورها', icon: MapIcon },
-    { href: '/admin/hotels', label: 'هتل‌ها', icon: BuildingOfficeIcon },
-    { href: '/admin/visa', label: 'ویزا', icon: DocumentTextIcon },
-    { href: '/admin/blog', label: 'مقالات', icon: NewspaperIcon },
-    { href: '/admin/media', label: 'رسانه', icon: PhotoIcon },
-    { href: '/admin/seo', label: 'SEO', icon: Cog6ToothIcon },
+    {
+      href: '/admin',
+      label: 'داشبورد',
+      icon: HomeIcon,
+    },
+    {
+      href: '/admin/tours',
+      label: 'تورها',
+      icon: MapIcon,
+    },
+    {
+      href: '/admin/hotels',
+      label: 'هتل‌ها',
+      icon: BuildingOfficeIcon,
+    },
+    {
+      href: '/admin/visa',
+      label: 'ویزا',
+      icon: DocumentTextIcon,
+    },
+    {
+      href: '/admin/blog',
+      label: 'مقالات',
+      icon: NewspaperIcon,
+    },
+    {
+      href: '/admin/media',
+      label: 'رسانه',
+      icon: PhotoIcon,
+    },
+    {
+      href: '/admin/seo',
+      label: 'SEO',
+      icon: Cog6ToothIcon,
+    },
   ];
 
   const isActive = (href: string) => {
     if (href === '/admin') {
       return pathname === '/admin';
     }
+
     return pathname?.startsWith(href);
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Admin Header */}
-      <header className="bg-white shadow-sm border-b sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <Link href="/admin" className="flex items-center space-x-2 space-x-reverse">
-              <h1 className="text-xl md:text-2xl font-bold text-gray-900">
+      {/* Header */}
+      <header className="sticky top-0 z-50 border-b bg-white shadow-sm">
+        <div className="mx-auto max-w-7xl px-4 py-4">
+          <div className="mb-4 flex items-center justify-between">
+            <Link
+              href="/admin"
+              className="flex items-center space-x-2 space-x-reverse"
+            >
+              <h1 className="text-xl font-bold text-gray-900 md:text-2xl">
                 پنل مدیریت آتاش تراول
               </h1>
             </Link>
+
             <div className="flex items-center gap-3">
               <span className="text-sm text-gray-600">
-                {user?.firstName} {user?.lastName}
+                {user?.firstName
+                  ? `${user.firstName} ${user.lastName ?? ''}`
+                  : user?.email}
               </span>
-              <Link 
-                href="/dashboard" 
-                className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition"
+
+              <Link
+                href="/dashboard"
+                className="rounded-lg bg-gray-100 px-4 py-2 text-sm transition hover:bg-gray-200"
               >
                 پنل کاربری
               </Link>
-              <Link 
-                href="/" 
-                className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition"
+
+              <Link
+                href="/"
+                className="rounded-lg bg-gray-100 px-4 py-2 text-sm transition hover:bg-gray-200"
               >
                 مشاهده سایت
               </Link>
+
+              <button
+                onClick={logout}
+                className="rounded-lg bg-red-600 px-4 py-2 text-sm text-white transition hover:bg-red-700"
+              >
+                خروج
+              </button>
             </div>
           </div>
-          
-          {/* Navigation */}
+
           <nav className="flex items-center gap-2 overflow-x-auto pb-2">
             {navItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
-              
+
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition ${
+                  className={`flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 transition ${
                     active
-                      ? 'bg-blue-600 text-white font-medium'
+                      ? 'bg-blue-600 font-medium text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="h-4 w-4" />
                   <span className="text-sm">{item.label}</span>
                 </Link>
               );
@@ -120,13 +175,13 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      {/* Admin Content */}
       <main>{children}</main>
 
-      {/* Admin Footer */}
-      <footer className="bg-white border-t mt-12 py-6">
-        <div className="max-w-7xl mx-auto px-4 text-center text-gray-600">
-          <p>پنل مدیریت آتاش تراول © {new Date().getFullYear()}</p>
+      <footer className="mt-12 border-t bg-white py-6">
+        <div className="mx-auto max-w-7xl px-4 text-center text-gray-600">
+          <p>
+            پنل مدیریت آتاش تراول © {new Date().getFullYear()}
+          </p>
         </div>
       </footer>
     </div>
