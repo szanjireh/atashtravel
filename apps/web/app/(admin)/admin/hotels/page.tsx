@@ -29,7 +29,7 @@ export default function AdminHotelsPage() {
     try {
       setLoading(true);
       const response = await apiClient.get('/hotels?limit=100');
-      setHotels(response.data.data || []);
+      setHotels(response.data.data?.data || []);
     } catch (err: any) {
       setError(err.message || 'خطا در بارگذاری هتل‌ها');
     } finally {

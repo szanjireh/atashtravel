@@ -29,7 +29,7 @@ export default function AdminToursPage() {
     try {
       setLoading(true);
       const response = await apiClient.get('/tours?limit=100');
-      setTours(response.data.data);
+      setTours(response.data.data?.data || []);
     } catch (err: any) {
       setError(err.message || 'خطا در بارگذاری تورها');
     } finally {

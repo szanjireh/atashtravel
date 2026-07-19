@@ -28,7 +28,7 @@ export default function AdminVisaPage() {
     try {
       setLoading(true);
       const response = await apiClient.get('/visa?limit=100');
-      setVisas(response.data.data || []);
+      setVisas(response.data.data?.data || []);
     } catch (err: any) {
       setError(err.message || 'خطا در بارگذاری خدمات ویزا');
     } finally {
