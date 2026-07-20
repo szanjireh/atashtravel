@@ -1,3 +1,4 @@
+import { Public } from '../../common/decorators/public.decorator';
 import {
   Body,
   Controller,
@@ -14,11 +15,12 @@ import { CreateCountryDto, UpdateCountryDto } from './dto';
 export class CountryController {
   constructor(private readonly countryService: CountryService) {}
 
+  @Public()
   @Get()
   findAll() {
-    return this.countryService.findAll();
+  return this.countryService.findAll();
   }
-
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.countryService.findOne(id);
