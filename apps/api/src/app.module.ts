@@ -1,3 +1,4 @@
+import { CountryModule } from './modules/country/country.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD, APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
@@ -20,6 +21,7 @@ import { PermissionsGuard } from './modules/auth/guards/permissions.guard';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { CityModule } from './modules/city/city.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -38,7 +40,9 @@ import configuration from './config/configuration';
     BlogModule,
     VisaModule,
     MediaModule,
+    CountryModule,
     SeoModule,
+    CityModule,
   ],
   controllers: [AppController],
   providers: [
