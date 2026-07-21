@@ -95,17 +95,13 @@ export default function TourFormPage({ params }: { params?: { id: string } }) {
   }, []);
 
   const loadCountries = async () => {
-    try {
-      // Load countries - you'll need to implement this endpoint
-      // For now using a simple list
-      setCountries([
-        { id: 'e532e5bc-7e06-4d9f-a923-35f2bb0ea3a7', name: 'ترکیه' },
-        { id: '2', name: 'ارمنستان' },
-        { id: '3', name: 'گرجستان' },
-      ]);
-    } catch (err) {
-      console.error('Error loading countries:', err);
-    }
+  try {
+    const response = await apiClient.get('/countries');
+
+    setCountries(response.data.data);
+  } catch (err) {
+    console.error('Error loading countries:', err);
+  }
   };
 
   const loadTour = async () => {
