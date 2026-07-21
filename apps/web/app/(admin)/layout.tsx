@@ -4,6 +4,7 @@ import { ReactNode, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
+  GlobeAltIcon,
   HomeIcon,
   MapIcon,
   BuildingOfficeIcon,
@@ -76,6 +77,16 @@ export default function AdminLayout({
       label: 'هتل‌ها',
       icon: BuildingOfficeIcon,
     },
+    {
+      href: '/admin/countries',
+      label: 'کشورها',
+      icon: GlobeAltIcon,
+    },
+    {
+      href: '/admin/cities',
+      label: 'شهرها',
+      icon: MapIcon,
+   },
     {
       href: '/admin/visa',
       label: 'ویزا',
