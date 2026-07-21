@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
+import { Public } from '../../common/decorators/public.decorator';
 import { CityService } from './city.service';
 import { CreateCityDto } from './dto/create-city.dto';
 import { UpdateCityDto } from './dto/update-city.dto';
@@ -19,12 +20,12 @@ export class CityController {
   create(@Body() createCityDto: CreateCityDto) {
     return this.cityService.create(createCityDto);
   }
-
+   @Public()
   @Get()
   findAll() {
     return this.cityService.findAll();
   }
-
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.cityService.findOne(id);
